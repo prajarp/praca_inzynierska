@@ -1,0 +1,50 @@
+# .env file (configuration and sensitive data)
+.env
+.env.backup
+.env.local
+.env.*.local
+
+# Composer dependencies
+/vendor
+
+# Node modules
+/node_modules
+
+# Laravel storage (logs, compiled templates, cache, etc.)
+/storage/*.key
+/storage/app/public
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+
+# Cache, logs, and compiled files
+/bootstrap/cache
+.phpunit.result.cache
+.phpunit-watcher.cache
+Homestead.json
+Homestead.yaml
+
+# IDE files
+.idea
+.vscode
+
+# PHPUnit
+phpunit.xml
+
+# Laravel Mix
+/public/hot
+/public/storage
+npm-debug.log
+yarn-error.log
+yarn-debug.log*
+.pnpm-debug.log*
+
+# Other files to ignore
+/.sass-cache
+/.env.example.local
+/.env.local.php
+/public/hot
+/public/vendor
+/public/hot
