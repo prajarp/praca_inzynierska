@@ -18,7 +18,7 @@ class Order extends Model
         'windows_weight',
         'total_weight',
         'window_area',
-        'window_dimensions'
+        'window_dimensions',
     ];
 
     public function orderItems()

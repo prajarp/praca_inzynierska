@@ -9,8 +9,12 @@ export default defineConfig({
                 transformAssetUrls: {
                     base: null,
                     includeAbsolute: false,
-                }
-            }
+                },
+                compilerOptions: {
+                    // Opcjonalne: obsługa niestandardowych elementów
+                    isCustomElement: tag => tag === 'LineChart' || tag === 'BarChart',
+                },
+            },
         }),
         laravel({
             input: ["resources/css/app.css", "resources/js/app.js"],

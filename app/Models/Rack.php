@@ -17,12 +17,6 @@ class Rack extends Model
         'loading_height',
         'loading_width',
         'loading_length',
-        'net_weight'
+        'net_weight',
     ];
-
-    // calculate rack loading space
-    public function calculateLoadingVolume()
-    {
-        return $this->loading_height * $this->loading_width * $this->loading_length;
-    }
 }

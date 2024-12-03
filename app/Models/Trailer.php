@@ -14,12 +14,6 @@ class Trailer extends Model
         'height',
         'width',
         'length',
-        'max_weight'
+        'max_weight',
     ];
-
-    // calculate trailer volume
-    public function calculateVolume()
-    {
-        return $this->height * $this->width * $this->length;
-    }
 }

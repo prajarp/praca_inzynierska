@@ -11,20 +11,15 @@ class OrderItem extends Model
 
     protected $fillable = [
         'order_id',
-        'item_type', // 'window' lub 'element'
+        'item_type',
         'weight',
         'height',
         'width',
-        'length'
+        'length',
     ];
 
     public function order()
     {
         return $this->belongsTo(Order::class);
-    }
-
-    public function calculateArea()
-    {
-        return $this->width * $this->length;
     }
 }
