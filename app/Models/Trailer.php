@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Trailer extends Model
@@ -13,12 +14,6 @@ class Trailer extends Model
         'height',
         'width',
         'length',
-        'max_weight'
+        'max_weight',
     ];
-
-    // calculate trailer volume
-    public function calculateVolume()
-    {
-        return $this->height * $this->width * $this->length;
-    }
 }

@@ -18,11 +18,16 @@ class Order extends Model
         'windows_weight',
         'total_weight',
         'window_area',
-        'window_dimensions'
+        'window_dimensions',
     ];
 
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function getWindowsWeightAttribute()
+    {
+        return $this->orderItems->where('item_type', 'window')->sum('weight');
     }
 }
