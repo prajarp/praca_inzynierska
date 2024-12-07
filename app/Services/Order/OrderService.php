@@ -184,8 +184,6 @@ class OrderService
                 'travel_info' => $results,
             ];
         };
-        $cwel = response()->json($coordinates);
-        dd($cwel);
         return response()->json($coordinates);
         // return $coordinates;
     }
