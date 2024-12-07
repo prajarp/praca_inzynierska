@@ -68,7 +68,7 @@ class PackingService
                 $window->getHeight(),
                 $window->getBreadth(),
                 $window->getWeight(),
-                true,
+                false,
             );
 
             $packager->addItem($item);
@@ -110,11 +110,15 @@ class PackingService
                 $rack = Rack::where('loading_height', '>=', ($heighestItem / 2))->first();
             }
 
+            // sprawdzic to
+            $height = $heighestItem > $rack->loading_height ? $heighestItem : $rack->loading_height;
+
             $bin = new Bin(
                 $order['order_id'].'.1',
                 $rack->loading_length,
                 $rack->loading_width,
-                $rack->loading_height,
+                // $rack->loading_height,
+                $height,
                 $rack->net_weight,
             );
 
@@ -125,7 +129,7 @@ class PackingService
                     $window['height'],
                     $window['width'],
                     $window['weight'],
-                    true,
+                    false,
                 );
                 $packager->addItem($item);
                 $packager->packItemToBin($bin, $item);
