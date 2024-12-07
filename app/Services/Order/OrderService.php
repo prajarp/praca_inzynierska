@@ -8,15 +8,13 @@ use Illuminate\Support\Facades\Http;
 class OrderService
 {
     private $TOM_TOM_API_KEY;
+    private $startLat = 52.955022599573766;
+    private $startLon = 22.294275637435177;
+    private $startAddress = "Stary Laskowiec 4, 18-300 Stary Laskowiec";
 
     public function __construct()
     {
         $this->TOM_TOM_API_KEY = env('TOMTOM_API_KEY');
-    }
-
-    public function index()
-    {
-        return $this->getCoordinatesWithOrders();
     }
 
     public function getCoordinatesWithOrders()
@@ -34,7 +32,11 @@ class OrderService
             ],
         ];
 
-        $orders = Order::with('orderItems')->get();
+        // $orders = Order::with('orderItems')->get();
+        $orders = Order::with('orderItems')
+        ->orderBy('id')
+        ->take(6)
+        ->get();
 
         foreach ($orders as $order) {
             $address = $order->delivery_address;
@@ -130,4 +132,62 @@ class OrderService
 
         return $earthRadius * $c;
     }
+
+    public function calculateRoute()
+    {
+        $coordinates = $this->getCoordinatesWithOrders();
+
+        $apiKey = $this->TOM_TOM_API_KEY;
+
+        for ($i = 0; $i < count($coordinates) - 1; $i++) {
+            $origin = $coordinates[$i];
+            $destination = $coordinates[$i + 1];
+
+            $results = [];
+
+            $url = "https://api.tomtom.com/routing/1/calculateRoute/{$origin['latitude']},{$origin['longitude']}:{$destination['latitude']},{$destination['longitude']}/json";
+
+            $response = Http::get($url, [
+                'key' => $apiKey,
+                'routeType' => 'fastest',
+                'travelMode' => 'truck',
+                'traffic' => 'true',
+            ]);
+            if ($response->failed()) {
+                $results[] = [
+                    'from' => $origin['address'],
+                    'to' => $destination['address'],
+                    'error' => 'Nie udało się obliczyć trasy.'
+                ];
+                continue;
+            }
+
+            $routeData = $response->json();
+            if (!isset($routeData['routes'][0]['summary'])) {
+                $results[] = [
+                    'from' => $origin['address'],
+                    'to' => $destination['address'],
+                    'error' => 'Brak danych o trasie.'
+                ];
+                continue;
+            }
+
+            $routeSummary = $routeData['routes'][0]['summary'];
+            $results[] = [
+                'from' => $origin['address'],
+                'to' => $destination['address'],
+                'distance_in_km' => round($routeSummary['lengthInMeters'] / 1000, 2),
+                'travel_time_in_minutes' => round($routeSummary['travelTimeInSeconds'] / 60, 2),
+                'traffic_delay_in_minutes' => round($routeSummary['trafficDelayInSeconds'] / 60, 2)
+            ];
+            $coordinates[$i + 1] += [
+                'travel_info' => $results,
+            ];
+        };
+        $cwel = response()->json($coordinates);
+        dd($cwel);
+        return response()->json($coordinates);
+        // return $coordinates;
+    }
+
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Services\Order\OrderService;
 use Inertia\Inertia;
 
@@ -11,9 +12,10 @@ class OrdersController extends Controller
 
     public function index()
     {
+        
         return Inertia::render('Orders', [
-            'orders' => $this->orderService->index(),
-            'coordinates' => $this->orderService->getCoordinatesWithOrders(),
+            'coordinates' => $this->orderService->calculateRoute(),
+            // 'secondCoordinates' => $this->orderService->calculateRoute2(),
         ]);
     }
 }

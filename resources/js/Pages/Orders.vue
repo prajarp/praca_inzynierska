@@ -1,10 +1,11 @@
 <script setup>
 import { defineProps, onMounted } from 'vue';
+import { ref } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
-  coordinates: Array
+  coordinates: Array,
 });
-
 const TOMTOM_API_KEY = import.meta.env.VITE_API_KEY;
 
 const truckConfig = {
@@ -22,25 +23,40 @@ function initializeMap() {
   const map = tt.map({
     key: TOMTOM_API_KEY,
     container: 'map',
-    center: [props.coordinates[0].longitude, props.coordinates[0].latitude],
+    center: [props.coordinates.original[0].longitude, props.coordinates.original[0].latitude],
     zoom: 6
   });
 
   map.addControl(new tt.NavigationControl());
 
   let index = 0;
-  props.coordinates.forEach((point) => {
+  props.coordinates.original.forEach((point) => {
     const marker = new tt.Marker()
       .setLngLat([point.longitude, point.latitude])
       .addTo(map);
 
-    const popup = new tt.Popup({ offset: 35 }).setText(index + ". " + point.address);
+    let popupText = `${index}. ${point.address}`;
+
+    if (point.travel_info && Array.isArray(point.travel_info)) {
+      const travelInfo = point.travel_info[0];
+      if (travelInfo && travelInfo.distance_in_km) {
+        popupText += '\n\n';
+        popupText += `From: ${travelInfo.from} To: ${travelInfo.to}`;
+        popupText += ` - Distance: ${travelInfo.distance_in_km} km`;
+        popupText += ` - In: ${travelInfo.travel_time_in_minutes} minutes`;
+      }
+    }
+
+    const popup = new tt.Popup({ offset: 35 }).setText(popupText);
     marker.setPopup(popup);
+
     index++;
   });
-  drawMap(map);
+
+  drawMap(map, props.coordinates.original, 'routeDemo', '#4a90a2'); // Niebieska trasa
 }
-async function drawMap(map) {
+
+async function drawMap(map, coordinates, layerId, color = '#4a90a2') {
   try {
     const tt = window.tt;
 
@@ -51,28 +67,28 @@ async function drawMap(map) {
 
     const response = await tt.services.calculateRoute({
       key: TOMTOM_API_KEY,
-      locations: props.coordinates.map(coord => `${coord.longitude},${coord.latitude}`).join(':'),
+      locations: coordinates.map(coord => `${coord.longitude},${coord.latitude}`).join(':'),
       ...truckConfig,
     });
 
     const geojsonObj = response.toGeoJson();
-    const boundaryCoords = props.coordinates.map(coord => [coord.longitude, coord.latitude]);
+    const boundaryCoords = coordinates.map(coord => [coord.longitude, coord.latitude]);
     setMapBounds(map, boundaryCoords);
 
     map.addLayer({
-      id: 'routeDemo',
+      id: layerId,
       type: 'line',
       source: {
         type: 'geojson',
         data: geojsonObj,
       },
       paint: {
-        'line-color': '#4a90a2',
+        'line-color': color, // Użycie koloru przekazanego do funkcji
         'line-width': 2,
       },
     });
   } catch (error) {
-    console.error("Błąd podczas rysowania trasy na mapie:", error);
+    console.error(`Błąd podczas rysowania trasy dla warstwy ${layerId}:`, error);
   }
 }
 
@@ -87,8 +103,12 @@ onMounted(() => {
 });
 </script>
 
+
+
+
 <template>
   <div id="map" style="width: 100%; height: 500px;"></div>
+
 </template>
 
 
