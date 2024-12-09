@@ -2,9 +2,9 @@
 import { defineProps, onMounted } from 'vue';
 import { ref } from 'vue';
 import axios from 'axios';
-
+import Navbar from '../components/Navbar.vue';
 const props = defineProps({
-  coordinates: Array,
+  coordinates: Object,
 });
 const TOMTOM_API_KEY = import.meta.env.VITE_API_KEY;
 
@@ -16,6 +16,11 @@ const truckConfig = {
   vehicleAxleWeight: 10000,
   vehicleCommercial: true,
 };
+
+function resetMap(map) {
+  map.remove(); // Usuń mapę
+  initializeMap();    // Funkcja inicjalizująca mapę
+}
 
 function initializeMap() {
   const tt = window.tt;
@@ -44,6 +49,7 @@ function initializeMap() {
         popupText += `From: ${travelInfo.from} To: ${travelInfo.to}`;
         popupText += ` - Distance: ${travelInfo.distance_in_km} km`;
         popupText += ` - In: ${travelInfo.travel_time_in_minutes} minutes`;
+        popupText += `\n\n ORDER ID ${point.order_id}`;
       }
     }
 
@@ -89,8 +95,13 @@ async function drawMap(map, coordinates, layerId, color = '#4a90a2') {
     });
   } catch (error) {
     console.error(`Błąd podczas rysowania trasy dla warstwy ${layerId}:`, error);
+    if(error) {
+      resetMap(map);
+    }
   }
 }
+
+
 
 function setMapBounds(map, coordinates) {
   const bounds = new tt.LngLatBounds();
@@ -105,10 +116,15 @@ onMounted(() => {
 
 
 
-
 <template>
-  <div id="map" style="width: 100%; height: 500px;"></div>
-
+  <div class="flex flex-col h-screen">
+    <div>
+      <Navbar />
+    </div>
+    <div id="map" class="flex-1">
+      Tu będzie mapa
+    </div>
+  </div>
 </template>
 
 

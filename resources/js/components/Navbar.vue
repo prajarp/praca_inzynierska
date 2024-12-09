@@ -1,48 +1,69 @@
 <template>
-    <nav class="bg-blue-600 p-4">
-      <!-- Container -->
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <!-- Logo -->
-        <div class="text-white font-semibold text-xl">
-          <!-- <router-link to="/" class="hover:text-gray-200">MyApp</router-link> -->
-        </div>
-  
-        <!-- Menu (Desktop View) -->
-        <div class="hidden md:flex space-x-6">
-          <router-link :to="{ name: 'packing' }" class="text-white hover:text-gray-200">Packing</router-link>
-          <router-link :to="{ name: 'orders' }" class="text-white hover:text-gray-200">Orders</router-link>
-        </div>
-  
-        <!-- Hamburger Menu (Mobile View) -->
-        <div class="md:hidden">
-          <button @click="toggleMenu" class="text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-  
-      <!-- Mobile Menu -->
-      <div v-if="isMenuOpen" class="md:hidden bg-blue-500 text-white p-4 space-y-4">
-        <!-- <router-link to="#" @click="closeMenu" class="block">Home</router-link>
-        <router-link to="#" @click="closeMenu" class="block">About</router-link>
-        <router-link to="#" @click="closeMenu" class="block">Services</router-link>
-        <router-link to="#" @click="closeMenu" class="block">Contact</router-link> -->
-      </div>
+    <nav class="flex items-center justify-between px-6 py-4 bg-white">
+      <ul class="flex items-center space-x-8">
+        <li>
+            <div class="relative">
+                <router-link
+                :to="{ name: 'packing' }"
+                class="nav-item"
+                @mouseenter="hoverPacking = true"
+                @mouseleave="hoverPacking = false"
+                >
+                Packing
+                </router-link>
+                <div
+                class="absolute left-0 bottom-0 h-[3px] bg-orange-500 transition-all duration-300"
+                :class="{ 'w-full': hoverPacking || $route.name === 'packing', 'w-0': !hoverPacking && $route.name !== 'packing' }"
+                ></div>
+            </div>
+            </li>
+            <li>
+            <div class="relative">
+                <router-link
+                :to="{ name: 'orders' }"
+                class="nav-item"
+                @mouseenter="hoverOrders = true"
+                @mouseleave="hoverOrders = false"
+                >
+                Orders
+                </router-link>
+                <div
+                class="absolute left-0 bottom-0 h-[3px] bg-orange-500 transition-all duration-300"
+                :class="{ 'w-full': hoverOrders || $route.name === 'orders', 'w-0': !hoverOrders && $route.name !== 'orders' }"
+                ></div>
+            </div>
+            </li>
+      </ul>
     </nav>
   </template>
   
-  <script setup>
-  import { ref } from 'vue';
+  <script>
+  import { ref } from "vue";
   
-  const isMenuOpen = ref(false);
+  export default {
+    setup() {
+      const hoverActive = ref(false);
+      const isActive = ref(true); // Ustaw na true, jeśli Kariera jest aktywnym widokiem
   
-  const toggleMenu = () => {
-    isMenuOpen.value = !isMenuOpen.value;
-  };
-  
-  const closeMenu = () => {
-    isMenuOpen.value = false;
+      return {
+        hoverActive,
+        isActive,
+      };
+    },
   };
   </script>
+  
+  <style scoped>
+  .nav-item {
+    @apply text-gray-700 font-medium transition-colors duration-300;
+  }
+  
+  .nav-item:hover {
+    @apply text-orange-500;
+  }
+  
+  .nav-item.active {
+    @apply text-orange-500;
+  }
+  </style>
+  
