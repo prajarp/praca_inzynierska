@@ -1,56 +1,62 @@
 <?php
 
-namespace App\Services\Order;
+namespace App\Services\SelectedOrders;
 
-use App\Models\Order;
+use App\Http\Requests\SelectedOrders\StoreSelectedOrdersRequest;
+use App\Models\SelectedOrder;
+use App\Services\Order\OrderService;
+use DB;
 use Illuminate\Support\Facades\Http;
 
-class OrderService
+class SelectedOrdersService
 {
+    private OrderService $orderService;
     private string $TOM_TOM_API_KEY;
-    private float $START_LAT = 52.955022599573766;
-    private float $START_LON = 22.294275637435177;
-    private string $START_ADDRESS = 'Stary Laskowiec 4, 18-300 Stary Laskowiec';
 
-    public function __construct()
+    public function __construct(OrderService $orderService)
     {
+        $this->orderService = $orderService;
         $this->TOM_TOM_API_KEY = env('TOMTOM_API_KEY');
     }
 
-    public function roundToNearestHalf(float $value): float
+    public function store(StoreSelectedOrdersRequest $request): void
     {
-        $floor = floor($value);
-        $fraction = $value - $floor;
-
-        return $fraction <= 0.5 ? $floor + 0.5 : ceil($value);
+        DB::table('selected_orders')->delete();
+        foreach ($request->selected as $order) {
+            SelectedOrder::create(['order_id' => $order['id']]);
+        }
     }
 
     public function getCoordinatesWithOrders(): array
     {
+        $startedLocations = $this->getStartLocation(); // Poprawione wywołanie
+
         $coordinates = [[
-            'address'   => $this->START_ADDRESS,
-            'latitude'  => $this->START_LAT,
-            'longitude' => $this->START_LON,
+            'address'   => $startedLocations['address'],
+            'latitude'  => $startedLocations['latitude'],
+            'longitude' => $startedLocations['longitude'],
             'windows'   => [],
         ]];
+        $selectedOrders = SelectedOrder::with('order.orderItems')->get();
 
-        $orders = Order::with('orderItems')->orderBy('id')->take(6)->get();
-
-        foreach ($orders as $order) {
-            $address = $order->delivery_address;
+        foreach ($selectedOrders as $order) {
+            $address = $order->order->delivery_address;
             $geocodeData = $this->fetchCoordinatesFromApi($address);
 
             if ($geocodeData) {
-                $windows = $order->orderItems
-                    ->filter(fn ($item) => $item->item_type === 'window')
-                    ->map(fn ($item) => [
-                        'weight' => $item->weight,
-                        'height' => $this->roundToNearestHalf($item->height),
-                        'width'  => $this->roundToNearestHalf($item->width),
-                        'length' => $this->roundToNearestHalf($item->length),
-                    ])
+                $windows = $order->order->orderItems
+                    ->whenNotEmpty(function ($items) {
+                        return $items->filter(fn($item) => $item->item_type === 'window')
+                            ->map(fn($item) => [
+                                'weight' => $item->weight,
+                                'height' => $this->roundToNearestHalf($item->height),
+                                'width'  => $this->roundToNearestHalf($item->width),
+                                'length' => $this->roundToNearestHalf($item->length),
+                            ]);
+                    }, fn() => collect([])) // Zwraca pustą kolekcję jeśli brak elementów
                     ->values()
                     ->toArray();
+
 
                 $coordinates[] = [
                     'order_id'  => $order->id,
@@ -62,24 +68,8 @@ class OrderService
             }
         }
 
+        // return $coordinates;
         return $this->getOptimizedRoute($coordinates);
-    }
-
-    private function fetchCoordinatesFromApi(string $address): ?array
-    {
-        $response = Http::get(
-            'https://api.tomtom.com/search/2/geocode/'.urlencode($address).'.json',
-            ['key' => $this->TOM_TOM_API_KEY, 'limit' => 1]
-        );
-
-        if ($response->successful() && isset($response['results'][0]['position'])) {
-            return [
-                'lat' => $response['results'][0]['position']['lat'],
-                'lon' => $response['results'][0]['position']['lon'],
-            ];
-        }
-
-        return null;
     }
 
     private function getOptimizedRoute(array $coordinates): array
@@ -142,8 +132,10 @@ class OrderService
 
             $url = sprintf(
                 'https://api.tomtom.com/routing/1/calculateRoute/%s,%s:%s,%s/json',
-                $origin['latitude'], $origin['longitude'],
-                $destination['latitude'], $destination['longitude']
+                $origin['latitude'],
+                $origin['longitude'],
+                $destination['latitude'],
+                $destination['longitude']
             );
 
             $response = Http::get($url, [
@@ -176,25 +168,45 @@ class OrderService
             $routeSummary = $routeData['routes'][0]['summary'];
 
             $results[] = [
-                'from'                   => $origin['address'],
-                'to'                     => $destination['address'],
-                'distance_in_km'         => round($routeSummary['lengthInMeters'] / 1000, 2),
+                'from' => $origin['address'],
+                'to' => $destination['address'],
+                'distance_in_km' => round($routeSummary['lengthInMeters'] / 1000, 2),
                 'travel_time_in_minutes' => round($routeSummary['travelTimeInSeconds'] / 60, 2),
                 'traffic_delay_in_minutes' => round($routeSummary['trafficDelayInSeconds'] / 60, 2),
             ];
 
             $coordinates[$i + 1] += ['travel_info' => $results];
         }
-
         return response()->json($coordinates);
+    }
+
+    private function fetchCoordinatesFromApi(string $address): ?array
+    {
+        $response = Http::get(
+            'https://api.tomtom.com/search/2/geocode/' . urlencode($address) . '.json',
+            ['key' => $this->TOM_TOM_API_KEY, 'limit' => 1]
+        );
+
+        if ($response->successful() && isset($response['results'][0]['position'])) {
+            return [
+                'lat' => $response['results'][0]['position']['lat'],
+                'lon' => $response['results'][0]['position']['lon'],
+            ];
+        }
+
+        return null;
     }
 
     public function getStartLocation(): array
     {
-        return [
-            'latitude' => $this->START_LAT,
-            'longitude' => $this->START_LON,
-            'address' => $this->START_ADDRESS,
-        ];
+        return $this->orderService->getStartLocation();
+    }
+
+    public function roundToNearestHalf(float $value): float
+    {
+        $floor = floor($value);
+        $fraction = $value - $floor;
+
+        return $fraction <= 0.5 ? $floor + 0.5 : ceil($value);
     }
 }
