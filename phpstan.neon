@@ -1,0 +1,19 @@
+parameters:
+    level: 5
+    
+    paths:
+        - app
+        - routes
+        - tests
+
+    # Automatyczne wywnioskowanie typów
+    inferPrivatePropertyTypeFromConstructor: true
+    
+    # Wyłączenie raportowania niezmatchowanych błędów
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        # Ignorowanie błędów związanych z brakiem docblocków
+        - '#Method .* has no return type specified#'
+        - '#Property .* has no type specified#'
+        - '#Missing PHPDoc for function#'

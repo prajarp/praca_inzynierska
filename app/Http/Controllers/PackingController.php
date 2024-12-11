@@ -10,7 +10,7 @@ class PackingController extends Controller
 {
     public function __construct(private PackingService $packingService) {}
 
-    public function index()
+    public function index(): \Inertia\Response
     {
         $tir = Trailer::first();
 

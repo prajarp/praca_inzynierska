@@ -13,7 +13,10 @@ class PackingService
 {
     public function __construct(private OrderService $orderService) {}
 
-    public function getSortedItemsForEachOrder()
+    /**
+     * @return array<int, array{order_id: int|null, address: string, sorted_windows: array<int, array<string, mixed>>}>
+     */
+    public function getSortedItemsForEachOrder(): array
     {
         $coordinatesWithOrders = $this->orderService->getCoordinatesWithOrders();
 
@@ -109,15 +112,13 @@ class PackingService
             if (! $rack) {
                 $rack = Rack::where('loading_height', '>=', ($heighestItem / 2))->first();
             }
-
-            // sprawdzic to
+            //Bin height depends on whats higher. Highest window or Rack
             $height = $heighestItem > $rack->loading_height ? $heighestItem : $rack->loading_height;
 
             $bin = new Bin(
                 $order['order_id'].'.1',
                 $rack->loading_length,
                 $rack->loading_width,
-                // $rack->loading_height,
                 $height,
                 $rack->net_weight,
             );
