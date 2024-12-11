@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'client_name',
         'delivery_address',
+        'voivodeship',
         'expected_delivery_date',
         'window_quantity',
         'other_elements_quantity',
@@ -26,8 +27,14 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function selectedOrders()
+    {
+        return $this->hasMany(SelectedOrder::class);
+    }
+
     public function getWindowsWeightAttribute()
     {
         return $this->orderItems->where('item_type', 'window')->sum('weight');
     }
+    
 }

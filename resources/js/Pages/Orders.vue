@@ -12,14 +12,12 @@
             :disabled="index === 0"
             class="bg-blue-500 text-white px-2 py-1 rounded disabled:bg-gray-400"
           >
-            ↑
           </button>
           <button
             @click="moveDown(index)"
             :disabled="index === reorderedCoordinates.length - 1"
             class="bg-blue-500 text-white px-2 py-1 rounded disabled:bg-gray-400"
           >
-            ↓
           </button>
         </div>
       </div>
@@ -33,10 +31,12 @@
 </template>
 
 <script setup>
-import { defineProps, ref, onMounted, watch } from 'vue';
-
+import { defineProps, onMounted } from 'vue';
+import { ref } from 'vue';
+import axios from 'axios';
+import Navbar from '../components/Navbar.vue';
 const props = defineProps({
-  coordinates: Array,
+  coordinates: Object,
 });
 
 const TOMTOM_API_KEY = import.meta.env.VITE_API_KEY;
@@ -53,7 +53,11 @@ const truckConfig = {
   vehicleCommercial: true,
 };
 
-// Funkcja inicjalizacji mapy
+function resetMap(map) {
+  map.remove(); // Usuń mapę
+  initializeMap();    // Funkcja inicjalizująca mapę
+}
+
 function initializeMap() {
   const tt = window.tt;
 
@@ -75,6 +79,18 @@ function initializeMap() {
       .addTo(map);
 
     let popupText = `${index}. ${point.address}`;
+
+    if (point.travel_info && Array.isArray(point.travel_info)) {
+      const travelInfo = point.travel_info[0];
+      if (travelInfo && travelInfo.distance_in_km) {
+        popupText += '\n\n';
+        popupText += `From: ${travelInfo.from} To: ${travelInfo.to}`;
+        popupText += ` - Distance: ${travelInfo.distance_in_km} km`;
+        popupText += ` - In: ${travelInfo.travel_time_in_minutes} minutes`;
+        popupText += `\n\n ORDER ID ${point.order_id}`;
+      }
+    }
+
     const popup = new tt.Popup({ offset: 35 }).setText(popupText);
     marker.setPopup(popup);
   });
@@ -120,14 +136,13 @@ async function drawMap(map, coordinates, layerId, color = '#4a90a2') {
       },
     });
   } catch (error) {
-    console.error(`Błąd podczas rysowania trasy:`, error);
+    console.error(`Błąd podczas rysowania trasy dla warstwy ${layerId}:`, error);
     if(error) {
-      location.reload();
-      // redrawMap();
+      resetMap(map);
+
     }
   }
 }
-
 // Ustawianie granic mapy
 function setMapBounds(map, coordinates) {
   const bounds = new tt.LngLatBounds();
@@ -169,7 +184,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;

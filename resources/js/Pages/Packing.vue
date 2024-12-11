@@ -1,71 +1,73 @@
 <template>
   <Navbar></Navbar>
-  <div class="flex">
-    <Section></Section>
-    <div class="max-w-7xl mx-auto font-sans text-gray-800">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-semibold text-blue-600">Trailer Matrix</h1>
-        <div class="bg-gray-600">
-          <p class="text-white">Front</p>
-        </div>
-        <div class="grid grid-cols-3 gap-4 mt-8">
-          <div v-for="(row, rowIndex) in trailer.matrix" :key="'row-' + rowIndex" class="space-y-4">
-            <div v-for="(trailerItem, colIndex) in row" :key="'col-' + colIndex">
-              <div v-if="trailerItem && trailerItem.bin"
-                class="p-4 text-center border border-gray-300 rounded-lg bg-blue-50 h-96 flex flex-col items-center justify-center">
-                <p><strong>Bin ID:</strong> {{ trailerItem.bin.id }}</p>
-                <p><strong>Client Name:</strong> {{ row[0]?.info[0].client_name }}</p>
-                <p><strong>Address</strong> {{ row[0]?.info[0].delivery_address }}</p>
 
-                <div v-tippy="{
-                  content: tooltipContent(trailerItem),
-                  theme: 'light',
-                  allowHTML: true,
-                  placement: 'top'
-                }">
-                  <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Show Details
-                  </button>
-                </div>
-              </div>
+    <!-- <Section></Section> -->
+    <div class="flex flex-1 overflow-hidden bg-gray-100">
+      <!-- Pierwszy kontener - 1/4 szerokości strony -->
+      <div class="w-1/4 p-4 overflow-auto">
+        <table class="table-fixed border-collapse border border-gray-300 w-full text-sm">
+          <thead>
+            <tr>
+              <th class="border border-gray-300 px-2 py-1">Vehicle Max Weight</th>
+              <th class="border border-gray-300 px-2 py-1">Total Order Weight</th>
+              <th class="border border-gray-300 px-2 py-1">Vehicle Max Volume</th>
+              <th class="border border-gray-300 px-2 py-1">Total Order Volume</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="border border-gray-300 px-2 py-1">{{ tir.max_weight }} kg</td>
+              <td class="border border-gray-300 px-2 py-1">{{ chartData.totalWeight }} kg</td>
+              <td class="border border-gray-300 px-2 py-1">{{ chartData.maxVolume }} m³</td>
+              <td class="border border-gray-300 px-2 py-1">{{ chartData.totalVolume }} m³</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="mt-4">
+          <div class="flex gap-2 mt-4 h-40">
+            <div class="flex-1">
+              <canvas ref="chartCanvas" class="w-full h-full"></canvas>
+            </div>
+            <div class="flex-1">
+              <canvas ref="volumeChart" class="w-full h-full"></canvas>
             </div>
           </div>
         </div>
-        <div class="bg-gray-600">
-          <p class="text-white">Back</p>
-        </div>
       </div>
-
-
-      <table class="table-fixed border-collapse border border-gray-300">
-        <thead>
-          <tr>
-            <th class="border border-gray-300 px-4 py-2">Vehicle Max Weight</th>
-            <th class="border border-gray-300 px-4 py-2">Total Order Weight</th>
-            <th class="border border-gray-300 px-4 py-2">Vehicle Max Volume</th>
-            <th class="border border-gray-300 px-4 py-2">Total Order Volume</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="border border-gray-300 px-4 py-2">{{ tir.max_weight }} kg </td>
-            <td class="border border-gray-300 px-4 py-2">{{ chartData.totalWeight }} kg </td>
-            <td class="border border-gray-300 px-4 py-2">{{ chartData.maxVolume }} m³ </td>
-            <td class="border border-gray-300 px-4 py-2">{{ chartData.totalVolume }} m³ </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="flex gap-5 mt-8">
-        <div class="flex-1 h-72">
-          <canvas ref="chartCanvas" class="w-full h-full"></canvas>
-        </div>
-        <div class="flex-1 h-72">
-          <canvas ref="volumeChart" class="w-full h-full"></canvas>
+      <!-- Drugi kontener - 3/4 szerokości strony -->
+      <div class="w-3/4 p-4 overflow-auto">
+        <div class="max-w-7xl mx-auto font-sans text-gray-800">
+          <div class="text-center mb-4">
+            <div class="bg-gray-600">
+              <p class="text-white text-sm">Sides</p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-4">
+              <div v-for="(row, rowIndex) in trailer.matrix" :key="'row-' + rowIndex" class="space-y-2">
+                <div v-if="row.bin"
+                  class="p-2 text-center border border-gray-300 rounded-lg bg-blue-50 h-56 flex flex-col items-center justify-center">
+                  <p class="text-sm"><strong>Bin ID:</strong> {{ row.bin.id }}</p>
+                  <p class="text-sm"><strong>Client Name:</strong> {{ row.info.client_name }}</p>
+                  <p class="text-sm"><strong>Address:</strong> {{ row.info.delivery_address }}</p>
+                  <div v-tippy="{
+                    content: tooltipContent(row),
+                    theme: 'light',
+                    allowHTML: true,
+                    placement: 'top'
+                  }">
+                    <button class="px-2 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+                      Show Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-gray-600 mt-2">
+              <p class="text-white text-sm">Sides</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 <script setup>
 import Chart from 'chart.js/auto';
@@ -80,10 +82,6 @@ import { router } from '@inertiajs/vue3';
 
 
 const props = defineProps({
-  // details: {
-  //   type: Object,
-  //   required: true,
-  // },
   trailer: {
     type: Object,
     required: true,
@@ -94,21 +92,23 @@ const props = defineProps({
   },
 });
 
-const tooltipContent = (trailerItem) => {
-  if (trailerItem && trailerItem.bin) {
+const tooltipContent = (row) => {
+  console.log(row);
+  if (row && row.bin) {
     return `
-      <strong>Total Fitted Weight:</strong> ${trailerItem.bin.totalFittedWeight} kg<br />
-      <strong>Total Fitted Volume:</strong> ${trailerItem.bin.totalFittedVolume} m³<br />
+      <strong>Total Fitted Weight:</strong> ${row.bin.totalFittedWeight} kg<br />
+      <strong>Total Fitted Weight:</strong> 55 kg<br />
+      <strong>Total Fitted Volume:</strong> ${row.bin.totalFittedVolume} m³<br />
       <h5>Fitted Items:</h5>
       <ul>
-        ${trailerItem.bin.fittedItems.map(item => `<li>${item.id} (Weight: ${item.weight} kg, Volume: ${item.volume} m³)</li>`).join('')}
+        ${row.bin.fittedItems.map(item => `<li>${item.id} (Weight: ${item.weight} kg, Volume: ${item.volume} m³)</li>`).join('')}
       </ul>
     `;
   }
+
   return 'No details available';
 };
 
-// const details = props.details.matrix;
 const trailerData = {
   total_volume: props.trailer.total_volume,
   total_weight: props.tir.max_weight,
