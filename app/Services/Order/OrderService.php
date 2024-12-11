@@ -182,10 +182,10 @@ class OrderService
                 'travel_time_in_minutes' => round($routeSummary['travelTimeInSeconds'] / 60, 2),
                 'traffic_delay_in_minutes' => round($routeSummary['trafficDelayInSeconds'] / 60, 2),
             ];
-
-            $coordinates[$i + 1] += ['travel_info' => $results];
-        }
-
+            $coordinates[$i + 1] += [
+                'travel_info' => $results,
+            ];
+        };
         return response()->json($coordinates);
     }
 
