@@ -1,4 +1,5 @@
 <template>
+  <Navbar></Navbar>
   <div class="flex w-full h-screen">
     <!-- Sekcja listy -->
     <div id="lista" class="w-1/4 bg-gray-200 p-4">
@@ -12,12 +13,14 @@
             :disabled="index === 0"
             class="bg-blue-500 text-white px-2 py-1 rounded disabled:bg-gray-400"
           >
+            ↑
           </button>
           <button
             @click="moveDown(index)"
             :disabled="index === reorderedCoordinates.length - 1"
             class="bg-blue-500 text-white px-2 py-1 rounded disabled:bg-gray-400"
           >
+            ↓
           </button>
         </div>
       </div>

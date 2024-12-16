@@ -3,6 +3,7 @@
 namespace App\Services\Order;
 
 use App\Models\Order;
+use App\Models\SelectedOrder;
 use Illuminate\Support\Facades\Http;
 
 class OrderService
@@ -24,45 +25,67 @@ class OrderService
 
         return $fraction <= 0.5 ? $floor + 0.5 : ceil($value);
     }
-
+    
     public function getCoordinatesWithOrders(): array
     {
+        $startedLocations = $this->getStartLocation(); // Poprawione wywołanie
+
         $coordinates = [[
-            'address'   => $this->START_ADDRESS,
-            'latitude'  => $this->START_LAT,
-            'longitude' => $this->START_LON,
+            'address'   => $startedLocations['address'],
+            'latitude'  => $startedLocations['latitude'],
+            'longitude' => $startedLocations['longitude'],
             'windows'   => [],
         ]];
-
-        $orders = Order::with('orderItems')->orderBy('id')->take(6)->get();
-
-        foreach ($orders as $order) {
+        // $selectedOrders = Order::with('orderItems', 'coordinates')->has('coordinates')->has('orderItems')->get();
+        $selectedOrders = Order::with('orderItems', 'coordinates')->has('coordinates')->take(15)->get();
+        // dd($selectedOrders);
+    
+        foreach ($selectedOrders as $order) {
             $address = $order->delivery_address;
+            
+            // Sprawdzenie, czy współrzędne istnieją
+            if (!is_null($order->coordinates?->latitude) && !is_null($order->coordinates?->longitude)) {
+                $coordinates[] = [
+                    'order_id'  => $order->id,
+                    'address'   => $address,
+                    'latitude'  => $order->coordinates->latitude,
+                    'longitude' => $order->coordinates->longitude,
+                    'windows'   => $this->getOrderWindows($order),
+                ];
+                continue;
+            }
+    
+            // Pobranie współrzędnych z API, jeśli brakuje
             $geocodeData = $this->fetchCoordinatesFromApi($address);
-
+    
             if ($geocodeData) {
-                $windows = $order->orderItems
-                    ->filter(fn ($item) => $item->item_type === 'window')
-                    ->map(fn ($item) => [
-                        'weight' => $item->weight,
-                        'height' => $this->roundToNearestHalf($item->height),
-                        'width'  => $this->roundToNearestHalf($item->width),
-                        'length' => $this->roundToNearestHalf($item->length),
-                    ])
-                    ->values()
-                    ->toArray();
-
                 $coordinates[] = [
                     'order_id'  => $order->id,
                     'address'   => $address,
                     'latitude'  => $geocodeData['lat'],
                     'longitude' => $geocodeData['lon'],
-                    'windows'   => $windows,
+                    'windows'   => $this->getOrderWindows($order),
                 ];
             }
         }
 
         return $this->getOptimizedRoute($coordinates);
+    }
+
+    private function getOrderWindows($order): array
+    {
+        return $order->orderItems
+            ->whenNotEmpty(function ($items) {
+                return $items->filter(fn($item) => $item->item_type === 'window')
+                    ->map(fn($item) => [
+                        'weight' => $item->weight,
+                        'height' => $this->roundToNearestHalf($item->height),
+                        'width'  => $this->roundToNearestHalf($item->width),
+                        'length' => $this->roundToNearestHalf($item->length),
+                    ]);
+            }, fn() => collect([]))
+            ->values()
+            ->toArray();
     }
 
     private function fetchCoordinatesFromApi(string $address): ?array

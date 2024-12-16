@@ -37,39 +37,57 @@ class SelectedOrdersService
             'longitude' => $startedLocations['longitude'],
             'windows'   => [],
         ]];
-        $selectedOrders = SelectedOrder::with('order.orderItems')->get();
-
+        $selectedOrders = SelectedOrder::with([
+            'order.orderItems',
+            'order.coordinates'
+        ])->get();
+    
         foreach ($selectedOrders as $order) {
             $address = $order->order->delivery_address;
+            
+            // Sprawdzenie, czy współrzędne istnieją
+            if (!is_null($order->order->coordinates?->latitude) && !is_null($order->order->coordinates?->longitude)) {
+                $coordinates[] = [
+                    'order_id'  => $order->id,
+                    'address'   => $address,
+                    'latitude'  => $order->order->coordinates->latitude,
+                    'longitude' => $order->order->coordinates->longitude,
+                    'windows'   => $this->getOrderWindows($order),
+                ];
+                continue;
+            }
+    
+            // Pobranie współrzędnych z API, jeśli brakuje
             $geocodeData = $this->fetchCoordinatesFromApi($address);
-
+    
             if ($geocodeData) {
-                $windows = $order->order->orderItems
-                    ->whenNotEmpty(function ($items) {
-                        return $items->filter(fn($item) => $item->item_type === 'window')
-                            ->map(fn($item) => [
-                                'weight' => $item->weight,
-                                'height' => $this->roundToNearestHalf($item->height),
-                                'width'  => $this->roundToNearestHalf($item->width),
-                                'length' => $this->roundToNearestHalf($item->length),
-                            ]);
-                    }, fn() => collect([])) // Zwraca pustą kolekcję jeśli brak elementów
-                    ->values()
-                    ->toArray();
-
-
                 $coordinates[] = [
                     'order_id'  => $order->id,
                     'address'   => $address,
                     'latitude'  => $geocodeData['lat'],
                     'longitude' => $geocodeData['lon'],
-                    'windows'   => $windows,
+                    'windows'   => $this->getOrderWindows($order),
                 ];
             }
         }
 
-        // return $coordinates;
         return $this->getOptimizedRoute($coordinates);
+    }
+
+    private function getOrderWindows($order): array
+    {
+        return $order->order->orderItems
+            ->whenNotEmpty(function ($items) {
+                return $items->filter(fn($item) => $item->item_type === 'window')
+                    ->map(fn($item) => [
+                        'weight' => $item->weight,
+                        'height' => $this->roundToNearestHalf($item->height),
+                        'width'  => $this->roundToNearestHalf($item->width),
+                        'length' => $this->roundToNearestHalf($item->length),
+                    ]);
+            }, fn() => collect([]))
+            ->values()
+            ->toArray();
     }
 
     private function getOptimizedRoute(array $coordinates): array

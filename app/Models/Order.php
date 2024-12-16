@@ -27,14 +27,20 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+
     public function selectedOrders()
     {
         return $this->hasMany(SelectedOrder::class);
+    }
+
+    public function coordinates()
+    {
+        return $this->hasOne(Coordinates::class);
     }
 
     public function getWindowsWeightAttribute()
     {
         return $this->orderItems->where('item_type', 'window')->sum('weight');
     }
-    
+
 }

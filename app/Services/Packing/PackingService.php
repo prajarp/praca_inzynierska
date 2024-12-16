@@ -46,13 +46,13 @@ class PackingService
         }
 
         usort($unfittedItems, function ($a, $b) {
-            return $b->getBreadth() <=> $a->getBreadth();
+            return $b->getHeight() <=> $a->getHeight();
         });
 
-        $largestBreadthItem = $unfittedItems[0];
-        $widestItem = $largestBreadthItem->getBreadth();
+        $highestUnfittedItems = $unfittedItems[0];
+        $highestUnfittedItem = $highestUnfittedItems->getHeight();
 
-        $rack = Rack::where('loading_height', '>=', $widestItem)->first();
+        $rack = Rack::where('loading_height', '>=', $highestUnfittedItem)->first();
 
         $newBin = new Bin(
             $orderId.'.'.(count($packager->getBins()) + 1),
@@ -165,84 +165,6 @@ class PackingService
         'trailer' => $trailer,
     ];
 }
-
-    // public function packOrdersIntoTrailer()
-    // {
-    //     $results = [];
-    //     $sortedOrders = collect($this->getSortedItemsForEachOrder());
-
-    //     $trailer = [
-    //         'matrix' => [],
-    //         'total_weight' => 0,
-    //         'total_volume' => 0,
-    //     ];
-
-    //     foreach ($sortedOrders as $order) {
-    //         $packager = new Packager();
-
-    //         $weightSum = collect($order['sorted_windows'])->sum('weight');
-    //         $heighestItem = collect($order['sorted_windows'])->max('height');
-
-    //         $rack = Rack::where('net_weight', '>=', $weightSum)
-    //             ->where('loading_height', '>=', $heighestItem)
-    //             ->first();
-
-    //         if (! $rack) {
-    //             $rack = Rack::where('loading_height', '>=', ($heighestItem / 2))->first();
-    //         }
-
-    //         $height = $heighestItem > $rack->loading_height ? $heighestItem : $rack->loading_height;
-
-    //         $bin = new Bin(
-    //             $order['order_id'].'.1',
-    //             $rack->loading_length,
-    //             $rack->loading_width,
-    //             $height,
-    //             $rack->net_weight,
-    //         );
-
-    //         foreach ($order['sorted_windows'] as $index => $window) {
-    //             $item = new Item(
-    //                 'window_'.$order['order_id'].'_'.($index + 1),
-    //                 $window['length'],
-    //                 $window['height'],
-    //                 $window['width'],
-    //                 $window['weight'],
-    //                 false,
-    //             );
-    //             $packager->addItem($item);
-    //             $packager->packItemToBin($bin, $item);
-    //         }
-
-    //         $packager->addBin($bin);
-
-    //         $this->handleUnfittedItems($packager, $bin, $order['order_id']);
-
-    //         $orderInfo = Order::where('id', $order['order_id'])->get();
-
-    //         foreach ($packager->getBins() as $packedBin) {
-    //             $results[] = [
-    //                 'order' => $order['order_id'],
-    //                 'info' => $orderInfo,
-    //                 'bin' => $packedBin,
-    //             ];
-    //         }
-    //     }
-
-    //     $trailer['matrix'] = array_merge($trailer['matrix'], $results);
-
-    //     $this->moveLastThreeToIndexes($trailer['matrix']);
-
-    //     foreach ($results as $result) {
-    //         $trailer['total_weight'] += $result['bin']->getWeight();
-    //         $trailer['total_volume'] += $result['bin']->getVolume();
-    //     }
-
-    //     dd($trailer);
-    //     return [
-    //         'trailer' => $trailer,
-    //     ];
-    // }
 
     function moveLastThreeToIndexes(array &$matrix)
     {

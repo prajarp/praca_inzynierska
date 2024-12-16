@@ -12,15 +12,7 @@ class OrderSelectionService
 {
     public function index()
     {
-        return Order::query()->select(
-            'id',
-            'client_name',
-            'delivery_address',
-            'voivodeship',
-            'expected_delivery_date',
-            'total_weight',
-            'window_area'
-        );
+        return Order::query()->with('orderItems', 'coordinates');
     }
 
     public function voivodeshipsDropdown()

@@ -36,37 +36,38 @@
       </div>
       <!-- Drugi kontener - 3/4 szerokości strony -->
       <div class="w-3/4 p-4 overflow-auto">
-        <div class="max-w-7xl mx-auto font-sans text-gray-800">
-          <div class="text-center mb-4">
-            <div class="bg-gray-600">
-              <p class="text-white text-sm">Sides</p>
-            </div>
-            <div class="grid grid-cols-3 gap-2 mt-4">
-              <div v-for="(row, rowIndex) in trailer.matrix" :key="'row-' + rowIndex" class="space-y-2">
-                <div v-if="row.bin"
-                  class="p-2 text-center border border-gray-300 rounded-lg bg-blue-50 h-56 flex flex-col items-center justify-center">
-                  <p class="text-sm"><strong>Bin ID:</strong> {{ row.bin.id }}</p>
-                  <p class="text-sm"><strong>Client Name:</strong> {{ row.info.client_name }}</p>
-                  <p class="text-sm"><strong>Address:</strong> {{ row.info.delivery_address }}</p>
-                  <div v-tippy="{
-                    content: tooltipContent(row),
-                    theme: 'light',
-                    allowHTML: true,
-                    placement: 'top'
-                  }">
-                    <button class="px-2 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
-                      Show Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gray-600 mt-2">
-              <p class="text-white text-sm">Sides</p>
+  <div class="max-w-7xl mx-auto font-sans text-gray-800">
+    <div class="text-center mb-4">
+      <div class="bg-gray-600">
+        <p class="text-white text-sm">Sides</p>
+      </div>
+      <!-- Wyświetlanie elementów w 3 rzędach -->
+      <div v-for="(row, rowIndex) in groupedMatrix" :key="'row-' + rowIndex" class="flex gap-4 justify-center mt-4">
+        <div v-for="(col, colIndex) in row" :key="'col-' + colIndex" class="space-y-2">
+          <div v-if="col.bin"
+            class="p-2 text-center border border-gray-300 rounded-lg bg-blue-50 h-56 flex flex-col items-center justify-center">
+            <p class="text-sm"><strong>Bin ID:</strong> {{ col.bin.id }}</p>
+            <p class="text-sm"><strong>Client Name:</strong> {{ col.info.client_name }}</p>
+            <p class="text-sm"><strong>Address:</strong> {{ col.info.delivery_address }}</p>
+            <div v-tippy="{
+              content: tooltipContent(col),
+              theme: 'light',
+              allowHTML: true,
+              placement: 'top'
+            }">
+              <button class="px-2 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+                Show Details
+              </button>
             </div>
           </div>
         </div>
       </div>
+      <div class="bg-gray-600 mt-2">
+        <p class="text-white text-sm">Sides</p>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
 </template>
 <script setup>
@@ -75,7 +76,7 @@ import Navbar from '../components/Navbar.vue';
 import Section from '../components/Section.vue';
 import VueTippy from 'vue-tippy'
 import { computed } from 'vue';
-import { calculateChartData } from '../chartUtils.js';
+import { calculateChartData } from '../charts/packingChart';
 import { onMounted } from 'vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -120,8 +121,6 @@ const chartData = calculateChartData(trailerData);
 const chartCanvas = ref(null);
 const volumeChart = ref(null);
 
-
-
 onMounted(() => {
   if (chartCanvas.value) {
     new Chart(chartCanvas.value, {
@@ -162,5 +161,18 @@ onMounted(() => {
       },
     });
   }
+});
+
+function chunkArray(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
+
+// Komputowana właściwość tworząca grupy
+const groupedMatrix = computed(() => {
+  return chunkArray(props.trailer.matrix, Math.ceil(props.trailer.matrix.length / 3));
 });
 </script>

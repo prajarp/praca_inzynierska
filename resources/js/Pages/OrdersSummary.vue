@@ -1,11 +1,22 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-[90vh]">
         <div>
             navbar
         </div>
-        <!-- <div id="map" class="flex-1">
-        </div> -->
-        {{ selectedOrders.original }}
+        <div id="map" class="flex-1">
+        </div>
+        <!-- <h2>
+            <strong>
+                {{ selectedOrders.original.length }}
+            </strong>
+        </h2> -->
+    </div>
+    <div class="mt-4 mr-10 flex justify-end">
+        <div>
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="sentToPacking">
+                Przygotuj zamówienie
+            </button>
+        </div>
     </div>
 </template>
 <script setup>
@@ -41,18 +52,18 @@ function initializeMap() {
 
     let index = 1;
     props.selectedOrders.original.slice(1).forEach((point) => {
-    // Tworzenie niestandardowego elementu HTML
-    const customElement = document.createElement('div');
-    customElement.className = 'custom-marker';
-    customElement.innerText = index;  // Ustawienie numeru punktu
+        // Tworzenie niestandardowego elementu HTML
+        const customElement = document.createElement('div');
+        customElement.className = 'custom-marker';
+        customElement.innerText = index;  // Ustawienie numeru punktu
 
-    // Dodanie znacznika do mapy
-    new tt.Marker({ element: customElement })
-        .setLngLat([point.longitude, point.latitude])
-        .addTo(map);
+        // Dodanie znacznika do mapy
+        new tt.Marker({ element: customElement })
+            .setLngLat([point.longitude, point.latitude])
+            .addTo(map);
 
-    index++;
-});
+        index++;
+    });
 
     drawMap(map, props.selectedOrders.original, 'routeDemo', '#4a90a2'); // Niebieska trasa
 }
@@ -89,7 +100,8 @@ async function drawMap(map, selectedOrders, layerId, color = '#4a90a2') {
         });
     } catch (error) {
         console.error(`Błąd podczas rysowania trasy dla warstwy ${layerId}:`, error);
-        // resetMap(map);
+        resetMap(map);
+        // redrawMap();
     }
 }
 
@@ -99,12 +111,22 @@ function setMapBounds(map, selectedOrders) {
     map.fitBounds(bounds, { padding: 20 });
 }
 
-// onMounted(() => {
-//     initializeMap();
-// });
+function redrawMap() {
+    const mapContainer = document.getElementById('map');
+    mapContainer.innerHTML = ''; // Wyczyść mapę
+    initializeMap(); // Narysuj mapę na nowo
+}
 
 
+onMounted(() => {
+    initializeMap();
+});
+
+const sentToPacking = () => {
+  router.get('/packing');
+};
 </script>
+
 <style scoped>
 .custom-marker {
     width: 100px;
@@ -117,6 +139,6 @@ function setMapBounds(map, selectedOrders) {
     line-height: 30px;
     border-radius: 50%;
     border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 </style>
