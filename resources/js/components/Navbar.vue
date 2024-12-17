@@ -18,20 +18,6 @@
       <li>
         <div class="relative text-white">
           <a 
-            href="/orders" 
-            :class="{'active-link': currentPath === '/orders'}"
-          >
-            Zamówienia
-          </a>
-          <div 
-            v-if="currentPath === '/orders'"
-            class="absolute left-0 bottom-0 h-[3px] bg-orange-500 transition-all duration-300"
-          ></div>
-        </div>
-      </li>
-      <li>
-        <div class="relative text-white">
-          <a 
             href="/packing" 
             :class="{'active-link': currentPath === '/packing'}"
           >
@@ -39,6 +25,20 @@
           </a>
           <div 
             v-if="currentPath === '/packing'"
+            class="absolute left-0 bottom-0 h-[3px] bg-orange-500 transition-all duration-300"
+          ></div>
+        </div>
+      </li>
+      <li>
+        <div class="relative text-white">
+          <a 
+            href="/orders" 
+            :class="{'active-link': currentPath === '/orders'}"
+          >
+            Zamówienia
+          </a>
+          <div 
+            v-if="currentPath === '/orders'"
             class="absolute left-0 bottom-0 h-[3px] bg-orange-500 transition-all duration-300"
           ></div>
         </div>

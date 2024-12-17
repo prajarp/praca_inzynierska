@@ -37,7 +37,7 @@ class OrderService
             'windows'   => [],
         ]];
         // $selectedOrders = Order::with('orderItems', 'coordinates')->has('coordinates')->has('orderItems')->get();
-        $selectedOrders = Order::with('orderItems', 'coordinates')->has('coordinates')->take(15)->get();
+        $selectedOrders = Order::with('orderItems', 'coordinates')->has('coordinates')->take(6)->get();
         // dd($selectedOrders);
     
         foreach ($selectedOrders as $order) {

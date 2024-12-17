@@ -5,13 +5,16 @@
       <div class="flex flex-col items-center justify-center border rounded-lg">
         <div class="w-full max-w-2xl bg-neutral-50 flex items-center justify-between py-4 px-4 rounded-t-lg mb-2">
           <p class="font-bold text-black text-xl">Wybrane zamówienia</p>
+          <button class="text-white bg-green-600 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2 text-center" @click="sendToAnotherView">
+            Stwórz trasę
+          </button>
           <button @click="clearList"
-            class="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center">Wyczyść
+            class="text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-400 font-medium rounded-full text-sm px-5 py-2 text-center">Wyczyść
             listę</button>
         </div>
 
         <!-- Lista zamówień -->
-        <ul v-if="selectedOrders.length" class="w-full max-w-2xl bg-neutral-50">
+        <ul v-if="selectedOrders.length" class="w-full max-w-2xl bg-gray-200">
           <li v-for="order in selectedOrders" :key="order.id" class="list-none mb-2">
             <div class="flex border rounded-lg shadow-md overflow-hidden">
               <div class="w-3/4 p-4 bg-neutral-50">
@@ -24,7 +27,7 @@
               </div>
               <div class="w-1/4 flex items-center justify-center bg-neutral-50">
                 <button @click="removeOrder(order.id)"
-                  class="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center">
+                  class="text-white bg-red-600 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2 text-center">
                   Usuń
                 </button>
               </div>
@@ -67,7 +70,10 @@
               <input type="checkbox" @change="toggleAll" :checked="isAllSelected" />
             </th>
             <th class="px-6 py-3 text-left">ID</th>
-            <th class="px-6 py-3 text-left">KLIENT</th>
+            <th class="px-6 py-3 text-left">
+            <span class="font-bold">KLIENT</span>
+            <span class="text-xs text-gray-500 italic">(podgląd zamówienia)</span>
+          </th>
             <th class="px-6 py-3 text-left">ADRES DOSTAWY</th>
             <th class="px-6 py-3 text-left">WOJEWÓDZTWO</th>
             <th class="px-6 py-3 text-left">DATA DOSTAWY</th>
@@ -81,7 +87,14 @@
               <input type="checkbox" :value="order" v-model="selectedOrders" />
             </td>
             <td class="px-6 py-4">{{ order.id }}</td>
-            <td class="px-6 py-4">{{ order.client_name }}</td>
+            <div v-tippy="{
+              content: tooltipContent(order),
+              theme: 'light',
+              allowHTML: true,
+              placement: 'top'
+            }">
+              <td class="px-6 py-4">{{ order.client_name }}</td>
+            </div>
             <td class="px-6 py-4">{{ order.delivery_address }}</td>
             <td class="px-6 py-4">{{ order.voivodeship }}</td>
             <td class="px-6 py-4">{{ order.expected_delivery_date }}</td>
@@ -93,7 +106,7 @@
 
       <div class="mt-4 flex justify-between items-center">
         <button :disabled="pagination.current_page === 1" @click="goToPage(pagination.current_page - 1)"
-          class="px-4 py-2 bg-gray-300 hover:bg-gray-400 disabled:opacity-50">
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-400 text-white disabled:opacity-50">
           Poprzednia
         </button>
 
@@ -103,17 +116,11 @@
 
         <button :disabled="pagination.current_page === pagination.last_page"
           @click="goToPage(pagination.current_page + 1)"
-          class="px-4 py-2 bg-gray-300 hover:bg-gray-400 disabled:opacity-50">
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-400 text-white disabled:opacity-50">
           Następna
         </button>
       </div>
-      <div class="mt-4">
-        <button class="px-4 py-2 bg-blue-500 text-white rounded" @click="sendToAnotherView">
-          Wyślij zaznaczone rekordy
-        </button>
-      </div>
       <div class="flex flex-row w-full">
-        <!-- Lewa strona: Udźwig i Waga -->
         <div class="w-1/2 p-4">
           <table class="table-fixed border-collapse border border-gray-300 w-full text-sm">
             <thead>
@@ -133,8 +140,6 @@
             <canvas ref="chartCanvas" class="w-full h-full"></canvas>
           </div>
         </div>
-
-        <!-- Prawa strona: Pojemność naczepy i zamówień -->
         <div class="w-1/2 p-4">
           <table class="table-fixed border-collapse border border-gray-300 w-full text-sm">
             <thead>
@@ -168,6 +173,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { calculateChartData, initializeWeightChart, initializeVolumeChart, updateCharts } from '../charts/selectionChart';
 import Navbar from '../components/Navbar.vue';
+import VueTippy from 'vue-tippy'
 
 const props = defineProps({
   orders: Object,
@@ -250,6 +256,17 @@ const sumVolume = (order) => {
     const length = item.length || 0;
     return total + height * width * length;
   }, 0);
+};
+
+const tooltipContent = (order) => {
+  console.log(order.order_items);
+  // if (order) {
+  return `
+      <strong>Zawartość zamówień:</strong> ${order.order_items.map(item => `<li>${item.id}, (Item Type: ${item.item_type}), (Weight: ${item.weight} kg,)</li>`).join('')}
+    `;
+  // }
+
+  // return 'No details available';
 };
 
 const sendToAnotherView = () => {

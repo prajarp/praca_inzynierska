@@ -1,19 +1,12 @@
 <template>
     <div class="flex flex-col h-[90vh]">
-        <div>
-            navbar
-        </div>
-        <div id="map" class="flex-1">
-        </div>
-        <!-- <h2>
-            <strong>
-                {{ selectedOrders.original.length }}
-            </strong>
-        </h2> -->
+        <div id="map" class="flex-1"></div>
     </div>
     <div class="mt-4 mr-10 flex justify-end">
         <div>
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="sentToPacking">
+            <button
+                class="text-white bg-green-600 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-xl px-5 py-3 text-center"
+                @click="sentToPacking">
                 Przygotuj zamówienie
             </button>
         </div>
@@ -29,8 +22,8 @@ const props = defineProps({
 const TOMTOM_API_KEY = import.meta.env.VITE_API_KEY;
 
 function resetMap(map) {
-    map.remove(); // Usuń mapę
-    initializeMap(); // Funkcja inicjalizująca mapę
+    map.remove();
+    initializeMap();
 }
 
 function initializeMap() {
@@ -51,21 +44,28 @@ function initializeMap() {
     map.addControl(new tt.NavigationControl());
 
     let index = 1;
+    console.log(props.selectedOrders);
     props.selectedOrders.original.slice(1).forEach((point) => {
-        // Tworzenie niestandardowego elementu HTML
         const customElement = document.createElement('div');
         customElement.className = 'custom-marker';
-        customElement.innerText = index;  // Ustawienie numeru punktu
+        customElement.innerText = index;
 
-        // Dodanie znacznika do mapy
-        new tt.Marker({ element: customElement })
+        customElement.style.width = '1px';
+        customElement.style.height = '10px';
+        customElement.style.lineHeight = '10px';
+        customElement.style.fontSize = '24px';
+
+        const marker = new tt.Marker({ element: customElement })
             .setLngLat([point.longitude, point.latitude])
             .addTo(map);
 
+            let popupText = `${index}. ${point.address}`;
+            const popup = new tt.Popup({ offset: 35 }).setText(popupText);
+            marker.setPopup(popup);
         index++;
     });
 
-    drawMap(map, props.selectedOrders.original, 'routeDemo', '#4a90a2'); // Niebieska trasa
+    drawMap(map, props.selectedOrders.original, 'routeDemo', '#4a90a2');
 }
 
 async function drawMap(map, selectedOrders, layerId, color = '#4a90a2') {
@@ -94,14 +94,14 @@ async function drawMap(map, selectedOrders, layerId, color = '#4a90a2') {
                 data: geojsonObj,
             },
             paint: {
-                'line-color': color, // Użycie koloru przekazanego do funkcji
+                'line-color': color,
                 'line-width': 2,
             },
         });
     } catch (error) {
         console.error(`Błąd podczas rysowania trasy dla warstwy ${layerId}:`, error);
         resetMap(map);
-        // redrawMap();
+
     }
 }
 
@@ -113,32 +113,31 @@ function setMapBounds(map, selectedOrders) {
 
 function redrawMap() {
     const mapContainer = document.getElementById('map');
-    mapContainer.innerHTML = ''; // Wyczyść mapę
-    initializeMap(); // Narysuj mapę na nowo
+    mapContainer.innerHTML = '';
+    initializeMap();
 }
-
 
 onMounted(() => {
     initializeMap();
 });
 
 const sentToPacking = () => {
-  router.get('/packing');
+    router.get('/packing');
 };
 </script>
 
 <style scoped>
 .custom-marker {
-    width: 100px;
-    height: 100px;
-    background-color: #4a90a2;
-    color: white;
-    font-size: 72px;
+    width: 300px; /* 3 razy większy niż pierwotne 100px */
+    height: 300px; /* 3 razy większy */
+    background-color: white; /* Tło kółka na biało */
+    color: #4a90a2; /* Kolor napisu */
+    font-size: 72px; /* Rozmiar czcionki */
     font-weight: bold;
     text-align: center;
-    line-height: 30px;
-    border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    line-height: 300px; /* Wyśrodkowanie tekstu w pionie */
+    border-radius: 50%; /* Kształt koła */
+    border: 5px solid #4a90a2; /* Obwódka */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Większy cień dla efektu */
 }
 </style>
