@@ -1,7 +1,5 @@
-// resources/js/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
 
-// Importowanie komponentów widoków
 import Section from '../components/Section.vue';
 import Navbar from '../components/Navbar.vue';
 import Packing from '../Pages/Packing.vue';

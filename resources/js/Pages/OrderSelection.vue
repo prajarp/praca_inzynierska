@@ -12,8 +12,6 @@
             class="text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-400 font-medium rounded-full text-sm px-5 py-2 text-center">Wyczyść
             listę</button>
         </div>
-
-        <!-- Lista zamówień -->
         <ul v-if="selectedOrders.length" class="w-full max-w-2xl bg-gray-200">
           <li v-for="order in selectedOrders" :key="order.id" class="list-none mb-2">
             <div class="flex border rounded-lg shadow-md overflow-hidden">
@@ -34,8 +32,6 @@
             </div>
           </li>
         </ul>
-
-        <!-- Brak zamówień -->
         <p v-else class="text-center w-full max-w-2xl bg-neutral-50 p-4">Brak zaznaczonych zamówień.</p>
       </div>
     </div>
@@ -173,7 +169,6 @@ import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { calculateChartData, initializeWeightChart, initializeVolumeChart, updateCharts } from '../charts/selectionChart';
 import Navbar from '../components/Navbar.vue';
-import VueTippy from 'vue-tippy'
 
 const props = defineProps({
   orders: Object,
@@ -260,13 +255,12 @@ const sumVolume = (order) => {
 
 const tooltipContent = (order) => {
   console.log(order.order_items);
-  // if (order) {
+if (order) {
   return `
       <strong>Zawartość zamówień:</strong> ${order.order_items.map(item => `<li>${item.id}, (Item Type: ${item.item_type}), (Weight: ${item.weight} kg,)</li>`).join('')}
     `;
-  // }
-
-  // return 'No details available';
+}
+return 'No details available';
 };
 
 const sendToAnotherView = () => {

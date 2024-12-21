@@ -182,7 +182,6 @@ function chunkArray(array, size) {
   return result;
 }
 
-// Komputowana właściwość tworząca grupy
 const groupedMatrix = computed(() => {
   return chunkArray(props.trailer.matrix, Math.ceil(props.trailer.matrix.length / 3));
 });

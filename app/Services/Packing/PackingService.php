@@ -137,7 +137,6 @@ class PackingService
 
             $orderInfo = Order::where('id', $order['order_id'])->first();
 
-            // Wynik dla tego zamówienia
             return collect($packager->getBins())->map(function ($packedBin) use ($order, $orderInfo) {
                 return [
                     'order' => $order['order_id'],

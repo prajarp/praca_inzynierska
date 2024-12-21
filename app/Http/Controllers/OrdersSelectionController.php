@@ -37,7 +37,6 @@ class OrdersSelectionController extends Controller
         $trailer = Trailer::first();
         return Inertia::render('OrderSelection', [
             'orders' => fn () => OrderResource::collection($orders),
-            // 'selectedList' => fn () => SelectedOrderResource::collection($this->orderSelectionSerivce->getSelectedList()),
             'pagination' => fn () => [
             'current_page' => $orders->currentPage(),
             'last_page' => $orders->lastPage(),
@@ -51,73 +50,5 @@ class OrdersSelectionController extends Controller
             'voivodeship' => $request->voivodeship,
             ],
         ]);
-    }
-
-    // public function storeSelected(Request $request)
-    // {
-    //     // Przechowaj dane w sesji
-    //     $request->session()->put('selected_orders', $request->selected);
-
-    //     // Przekieruj do innego widoku
-    //     return redirect()->route('orders.summary');
-    // }
-
-    // public function summary(Request $request)
-    // {
-    //     // Pobierz dane z sesji
-    //     $selectedOrders = $request->session()->get('selected_orders', []);
-
-    //     return Inertia::render('OrderSummary', [
-    //         'selectedOrders' => $selectedOrders,
-    //     ]);
-    // }
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

@@ -29,7 +29,7 @@ class SelectedOrdersService
 
     public function getCoordinatesWithOrders(): array
     {
-        $startedLocations = $this->getStartLocation(); // Poprawione wywołanie
+        $startedLocations = $this->getStartLocation();
 
         $coordinates = [[
             'address'   => $startedLocations['address'],
@@ -41,11 +41,10 @@ class SelectedOrdersService
             'order.orderItems',
             'order.coordinates'
         ])->get();
-    
+
         foreach ($selectedOrders as $order) {
             $address = $order->order->delivery_address;
-            
-            // Sprawdzenie, czy współrzędne istnieją
+
             if (!is_null($order->order->coordinates?->latitude) && !is_null($order->order->coordinates?->longitude)) {
                 $coordinates[] = [
                     'order_id'  => $order->id,
@@ -56,10 +55,9 @@ class SelectedOrdersService
                 ];
                 continue;
             }
-    
-            // Pobranie współrzędnych z API, jeśli brakuje
+
             $geocodeData = $this->fetchCoordinatesFromApi($address);
-    
+
             if ($geocodeData) {
                 $coordinates[] = [
                     'order_id'  => $order->id,

@@ -48,7 +48,6 @@
 </template>
 
 <script setup>
-// Aktualny path
 import { ref, onMounted } from 'vue';
 
 const currentPath = ref('');
@@ -59,7 +58,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Klasa dla aktywnego linku */
 .active-link {
   color: #f97316; /* Pomarańczowy kolor */
   font-weight: bold;

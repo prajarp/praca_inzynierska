@@ -18,5 +18,3 @@ Route::prefix('orders')->name('orders.')->group(function () {
     Route::resource('list', OrdersSelectionController::class);
     Route::resource('selected', SelectedOrderController::class);
 });
-
-// Route::get('/orders/summary', [SelectedOrderController::class, 'storeSelected'])->name('orders.summary');

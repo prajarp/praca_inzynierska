@@ -6,7 +6,7 @@ export function calculateChartData(trailer) {
     const totalWeight = trailer.matrix.flat().reduce((sum, trailerItem) => {
       if (trailerItem?.bin) {
           const itemsWeight = trailerItem.bin.fittedItems?.reduce((itemSum, item) => {
-              return itemSum + (item.weight || 0); // Dodaj wagę itemów
+              return itemSum + (item.weight || 0);
           }, 0) || 0;
           return sum + trailerItem.bin.totalFittedWeight + itemsWeight;
       }

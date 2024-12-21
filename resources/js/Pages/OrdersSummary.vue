@@ -15,6 +15,7 @@
 <script setup>
 
 import { defineProps, onMounted } from 'vue';
+import { router } from '@inertiajs/vue3';
 const props = defineProps({
     selectedOrders: Object,
 });
@@ -44,7 +45,6 @@ function initializeMap() {
     map.addControl(new tt.NavigationControl());
 
     let index = 1;
-    console.log(props.selectedOrders);
     props.selectedOrders.original.slice(1).forEach((point) => {
         const customElement = document.createElement('div');
         customElement.className = 'custom-marker';
@@ -128,16 +128,16 @@ const sentToPacking = () => {
 
 <style scoped>
 .custom-marker {
-    width: 300px; /* 3 razy większy niż pierwotne 100px */
-    height: 300px; /* 3 razy większy */
-    background-color: white; /* Tło kółka na biało */
-    color: #4a90a2; /* Kolor napisu */
-    font-size: 72px; /* Rozmiar czcionki */
+    width: 300px;
+    height: 300px;
+    background-color: white;
+    color: #4a90a2;
+    font-size: 72px;
     font-weight: bold;
     text-align: center;
-    line-height: 300px; /* Wyśrodkowanie tekstu w pionie */
-    border-radius: 50%; /* Kształt koła */
-    border: 5px solid #4a90a2; /* Obwódka */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Większy cień dla efektu */
+    line-height: 300px;
+    border-radius: 50%;
+    border: 5px solid #4a90a2;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 </style>

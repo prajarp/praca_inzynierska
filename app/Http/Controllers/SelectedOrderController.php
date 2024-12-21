@@ -16,7 +16,6 @@ class SelectedOrderController extends Controller
 
     public function index(): \Inertia\Response
     {
-        $this->selectedOrdersService->getCoordinatesWithOrders();
         return Inertia::render('OrdersSummary', [
             'selectedOrders' => $this->selectedOrdersService->calculateRoute(),
         ]);
