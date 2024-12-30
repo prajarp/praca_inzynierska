@@ -11,7 +11,6 @@ export default defineConfig({
                     includeAbsolute: false,
                 },
                 compilerOptions: {
-                    // Opcjonalne: obsługa niestandardowych elementów
                     isCustomElement: tag => tag === 'LineChart' || tag === 'BarChart',
                 },
             },

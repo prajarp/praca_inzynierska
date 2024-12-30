@@ -1,25 +1,31 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-[90vh]">
+        <div id="map" class="flex-1"></div>
+    </div>
+    <div class="mt-4 mr-10 flex justify-end">
         <div>
-            navbar
+            <button
+                class="text-white bg-green-600 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-xl px-5 py-3 text-center"
+                @click="sentToPacking">
+                Przygotuj proces pakowania
+            </button>
         </div>
-        <!-- <div id="map" class="flex-1">
-        </div> -->
-        {{ selectedOrders.original }}
     </div>
 </template>
 <script setup>
 
-import { defineProps, onMounted } from 'vue';
+import { onMounted } from 'vue';
+import { router } from '@inertiajs/vue3';
 const props = defineProps({
     selectedOrders: Object,
+    vehicle: Object,
 });
 
 const TOMTOM_API_KEY = import.meta.env.VITE_API_KEY;
 
 function resetMap(map) {
-    map.remove(); // Usuń mapę
-    initializeMap(); // Funkcja inicjalizująca mapę
+    map.remove();
+    initializeMap();
 }
 
 function initializeMap() {
@@ -41,20 +47,26 @@ function initializeMap() {
 
     let index = 1;
     props.selectedOrders.original.slice(1).forEach((point) => {
-    // Tworzenie niestandardowego elementu HTML
-    const customElement = document.createElement('div');
-    customElement.className = 'custom-marker';
-    customElement.innerText = index;  // Ustawienie numeru punktu
+        const customElement = document.createElement('div');
+        customElement.className = 'custom-marker';
+        customElement.innerText = index;
 
-    // Dodanie znacznika do mapy
-    new tt.Marker({ element: customElement })
-        .setLngLat([point.longitude, point.latitude])
-        .addTo(map);
+        customElement.style.width = '1px';
+        customElement.style.height = '10px';
+        customElement.style.lineHeight = '10px';
+        customElement.style.fontSize = '24px';
 
-    index++;
-});
+        const marker = new tt.Marker({ element: customElement })
+            .setLngLat([point.longitude, point.latitude])
+            .addTo(map);
 
-    drawMap(map, props.selectedOrders.original, 'routeDemo', '#4a90a2'); // Niebieska trasa
+            let popupText = `${index}. ${point.address}`;
+            const popup = new tt.Popup({ offset: 35 }).setText(popupText);
+            marker.setPopup(popup);
+        index++;
+    });
+
+    drawMap(map, props.selectedOrders.original, 'routeDemo', '#4a90a2');
 }
 
 async function drawMap(map, selectedOrders, layerId, color = '#4a90a2') {
@@ -83,13 +95,14 @@ async function drawMap(map, selectedOrders, layerId, color = '#4a90a2') {
                 data: geojsonObj,
             },
             paint: {
-                'line-color': color, // Użycie koloru przekazanego do funkcji
+                'line-color': color,
                 'line-width': 2,
             },
         });
     } catch (error) {
         console.error(`Błąd podczas rysowania trasy dla warstwy ${layerId}:`, error);
-        // resetMap(map);
+        resetMap(map);
+
     }
 }
 
@@ -99,24 +112,33 @@ function setMapBounds(map, selectedOrders) {
     map.fitBounds(bounds, { padding: 20 });
 }
 
-// onMounted(() => {
-//     initializeMap();
-// });
+function redrawMap() {
+    const mapContainer = document.getElementById('map');
+    mapContainer.innerHTML = '';
+    initializeMap();
+}
 
+onMounted(() => {
+    initializeMap();
+});
 
+const sentToPacking = () => {
+    router.get('/packing');
+};
 </script>
+
 <style scoped>
 .custom-marker {
-    width: 100px;
-    height: 100px;
-    background-color: #4a90a2;
-    color: white;
+    width: 300px;
+    height: 300px;
+    background-color: white;
+    color: #4a90a2;
     font-size: 72px;
     font-weight: bold;
     text-align: center;
-    line-height: 30px;
+    line-height: 300px;
     border-radius: 50%;
-    border: 2px solid white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    border: 5px solid #4a90a2;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 </style>

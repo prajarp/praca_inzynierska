@@ -15,5 +15,9 @@ class Trailer extends Model
         'width',
         'length',
         'max_weight',
+        'total_height',
+        'total_length',
+        'axle_weight',
+        'total_weight',
     ];
 }

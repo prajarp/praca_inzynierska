@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OrderSelectionResource extends JsonResource
+class OrderResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,6 +20,7 @@ class OrderSelectionResource extends JsonResource
             'delivery_address' => $this->delivery_address,
             'voivodeship' => $this->voivodeship,
             'expected_delivery_date' => $this->expected_delivery_date,
+            'order_items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
         ];
     }
 }
