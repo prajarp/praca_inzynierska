@@ -1,5 +1,7 @@
 import Chart from 'chart.js/auto';
 
+const BILION = 1000000000;
+
 export function calculateChartData(selectedOrders, props) {
     const totalWeight = selectedOrders.value.reduce((sum, orderItem) => {
       if (orderItem?.order_items) {
@@ -17,7 +19,7 @@ export function calculateChartData(selectedOrders, props) {
           const height = item.height || 0;
           const width = item.width || 0;
           const length = item.length || 0;
-          return itemsSum + height * width * length;
+          return (itemsSum + height * width * length) / BILION;
         }, 0);
         return sum + orderItemsVolume;
       }

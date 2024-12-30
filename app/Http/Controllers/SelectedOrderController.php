@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SelectedOrders\StoreSelectedOrdersRequest;
 use App\Http\Resources\SelectedOrderResource;
 use App\Models\SelectedOrder;
+use App\Models\Trailer;
 use App\Services\SelectedOrders\SelectedOrdersService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class SelectedOrderController extends Controller
     {
         return Inertia::render('OrdersSummary', [
             'selectedOrders' => $this->selectedOrdersService->calculateRoute(),
+            'vehicle' => Trailer::first(),
         ]);
     }
 

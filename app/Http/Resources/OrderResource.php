@@ -20,12 +20,6 @@ class OrderResource extends JsonResource
             'delivery_address' => $this->delivery_address,
             'voivodeship' => $this->voivodeship,
             'expected_delivery_date' => $this->expected_delivery_date,
-            'window_quantity' => $this->window_quantity,
-            'other_elements_quantity' => $this->other_elements_quantity,
-            'windows_weight' => $this->windows_weight,
-            'total_weight' => $this->total_weight,
-            'window_area' => $this->window_area,
-            'window_dimensions' => $this->window_dimensions,
             'order_items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
         ];
     }

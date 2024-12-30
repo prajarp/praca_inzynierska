@@ -1,118 +1,216 @@
 <template>
   <Navbar></Navbar>
   <div class="flex flex-1 overflow-hidden bg-gray-100">
+    <div class="w-1/4 p-4 bg-gray-100 flex items-center justify-center">
+      <div class="flex flex-col items-center justify-center border rounded-lg w-full">
+        <div class="w-full max-w-2xl bg-neutral-50 flex items-center justify-between py-4 px-4 rounded-t-lg mb-2">
+          <p class="font-bold text-black text-xl">Trasa</p>
+        </div>
+        <ul class="w-full">
+          <li v-for="(order, index) in props.orderList" :key="order" class="list-none mb-2 w-full">
+            <div class="flex border rounded-lg shadow-xl overflow-hidden w-full">
+              <div class="w-full p-4 bg-greutral-500">
+                <p>
+                  <strong>{{ index + 1 }}. </strong> {{ order.address }} <br />
+                </p>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
     <div class="w-full p-4 overflow-auto">
       <div class="max-w-7xl mx-auto font-sans text-gray-800">
+        <div class="flex items-center justify-center bg-gray-400 ">
+          <p>Bok naczepy</p>
+        </div>
         <div class="border-solid border-4 border-gray-900">
-        <div class="text-center mb-4">
-          <div v-for="(row, rowIndex) in groupedMatrix" :key="'row-' + rowIndex" class="flex gap-4 mt-4">
-            <div v-for="(col, colIndex) in row" :key="'col-' + colIndex" class="space-y-2">
-              <div v-if="col.bin"
-  class="relative p-4 border border-gray-300 rounded-lg bg-blue-400 h-56 flex flex-col justify-start shadow-md">
-  
-  <!-- Przycisk w prawym górnym rogu -->
-  <div v-tippy="{
-        content: tooltipContent(col),
-        theme: 'light',
-        allowHTML: true,
-        placement: 'top'
-      }">
-    <button
-      class="text-white text-sm absolute top-2 right-2 px-2 py-1 bg-blue-300 font-semibold rounded-md hover:bg-blue-200 transition-colors duration-200">
-      Zawartość zamówienia
-    </button>
-  </div>
-
-  <!-- Zawartość przesunięta na dół -->
-  <div class="mt-auto self-start text-left">
-    <p class="text-sm text-white"><strong>Bin ID:</strong> {{ col.bin.id }}</p>
-    <p class="text-sm text-white"><strong>Client Name:</strong> {{ col.info.client_name }}</p>
-    <p class="text-sm text-white"><strong>Address:</strong> {{ col.info.delivery_address }}</p>
-  </div>
-</div>
+          <div class="text-center ml-4 mb-4 mt-4">
+            <div class="flex space-x-2 mb-4">
+              <div v-for="(item, index) in firstRow" :key="index"
+                class="space-y-2 w-[200px] h-[150px] md:w-[250px] md:h-[200px]">
+                <div v-if="item"
+                  class="relative p-4 border border-gray-300 rounded-lg bg-blue-400 flex flex-col justify-start shadow-md w-full h-full">
+                  <div v-tippy="{
+                    content: tooltipContent(item.bin),
+                    theme: 'light',
+                    allowHTML: true,
+                    placement: 'top',
+                  }">
+                    <button
+                      class="text-white text-sm absolute top-2 right-2 left-2 px-1 py-1 bg-blue-300 font-semibold rounded-md hover:bg-blue-200 transition-colors duration-200">
+                      Zawartość
+                    </button>
+                  </div>
+                  <div class="mt-auto self-start text-left">
+                    <p class="text-sm text-white"><strong>Client Name:</strong> {{ item.info.client_name }}</p>
+                    <p class="text-sm text-white"><strong>Address:</strong> {{ item.info.delivery_address }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex space-x-2 mb-4">
+              <div v-for="(item, index) in thirdRow" :key="index"
+                class="space-y-2 w-[200px] h-[150px] md:w-[250px] md:h-[200px]">
+                <div v-if="item"
+                  class="relative p-4 border border-gray-300 rounded-lg bg-blue-400 flex flex-col justify-start shadow-md w-full h-full">
+                  <div v-tippy="{
+                    content: tooltipContent(item.bin),
+                    theme: 'light',
+                    allowHTML: true,
+                    placement: 'top',
+                  }">
+                    <button
+                      class="text-white text-sm absolute top-2 right-2 left-2 px-1 py-1 bg-blue-300 font-semibold rounded-md hover:bg-blue-200 transition-colors duration-200">
+                      Zawartość
+                    </button>
+                  </div>
+                  <div class="mt-auto self-start text-left">
+                    <p class="text-sm text-white"><strong>Client Name:</strong> {{ item.info.client_name }}</p>
+                    <p class="text-sm text-white"><strong>Address:</strong> {{ item.info.delivery_address }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex space-x-2 mb-4" v-if="secondRow.length > 0">
+              <div v-for="(item, index) in secondRow" :key="index"
+                class="space-y-2 w-[200px] h-[150px] md:w-[250px] md:h-[200px]">
+                <div v-if="item"
+                  class="relative p-4 border border-gray-300 rounded-lg bg-blue-400 flex flex-col justify-start shadow-md w-full h-full">
+                  <div v-tippy="{
+                    content: tooltipContent(item.bin),
+                    theme: 'light',
+                    allowHTML: true,
+                    placement: 'top',
+                  }">
+                    <button
+                      class="text-white text-sm absolute top-2 right-2 left-2 px-1 py-1 bg-blue-300 font-semibold rounded-md hover:bg-blue-200 transition-colors duration-200">
+                      Zawartość
+                    </button>
+                  </div>
+                  <div class="mt-auto self-start text-left">
+                    <p class="text-sm text-white"><strong>Client Name:</strong> {{ item.info.client_name }}</p>
+                    <p class="text-sm text-white"><strong>Address:</strong> {{ item.info.delivery_address }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center justify-center bg-gray-400 ">
+          <p>Bok naczepy</p>
+        </div>
+      </div>
+      <div class="flex flex-row w-full">
+        <div class="w-1/2 p-4 flex flex-col items-center justify-center">
+          <table class="table-fixed border-collapse border border-gray-300 w-2/4 text-sm mx-auto">
+            <thead>
+              <tr>
+                <th class="border border-gray-300 px-2 py-1">Udźwig pojazdu</th>
+                <th class="border border-gray-300 px-2 py-1">Waga zamówień</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="border border-gray-300 px-2 py-1">{{ vehicle.max_weight }} kg</td>
+                <td class="border border-gray-300 px-2 py-1">{{ chartData.totalWeight }} kg</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-4 h-[150px] flex items-center justify-center">
+            <canvas ref="chartCanvas" class="w-full h-full"></canvas>
+          </div>
+        </div>
+        <div class="w-1/2 p-4 flex flex-col items-center justify-center">
+          <div>
+            <table class="table-fixed border-collapse border border-gray-300 w-2/4 text-sm mx-auto">
+              <thead>
+                <tr>
+                  <th class="border border-gray-300 px-2 py-1">Pojemność naczepy</th>
+                  <th class="border border-gray-300 px-2 py-1">Objętość zamówień</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="border border-gray-300 px-2 py-1">
+                    {{ Math.round(chartData.maxVolume).toFixed(2) }} m³
+                  </td>
+                  <td class="border border-gray-300 px-2 py-1">
+                    {{ Math.round(chartData.totalVolume).toFixed(2) }} m³
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="mt-4 h-[150px] flex items-center justify-center">
+              <canvas ref="volumeChart" class="w-full h-full"></canvas>
             </div>
           </div>
         </div>
       </div>
-      </div>
     </div>
+
   </div>
-  <div class="flex flex-row w-full">
-    <div class="w-1/2 p-4 flex flex-col items-center justify-center">
-      <table class="table-fixed border-collapse border border-gray-300 w-2/4 text-sm mx-auto">
-        <thead>
-          <tr>
-            <th class="border border-gray-300 px-2 py-1">Udźwig pojazdu</th>
-            <th class="border border-gray-300 px-2 py-1">Waga zamówień</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="border border-gray-300 px-2 py-1">{{ tir.max_weight }} kg</td>
-            <td class="border border-gray-300 px-2 py-1">{{ chartData.totalWeight }} kg</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="mt-4 h-[150px] flex items-center justify-center">
-        <canvas ref="chartCanvas" class="w-full h-full"></canvas>
-      </div>
-    </div>
-    <div class="w-1/2 p-4 flex flex-col items-center justify-center">
-      <table class="table-fixed border-collapse border border-gray-300 w-2/4 text-sm mx-auto">
-        <thead>
-          <tr>
-            <th class="border border-gray-300 px-2 py-1">Pojemność naczepy</th>
-            <th class="border border-gray-300 px-2 py-1">Pojemność zamówień</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="border border-gray-300 px-2 py-1">
-              {{ Math.round(chartData.maxVolume).toFixed(2) }} m³
-            </td>
-            <td class="border border-gray-300 px-2 py-1">
-              {{ Math.round(chartData.totalVolume).toFixed(2) }} m³
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="mt-4 h-[150px] flex items-center justify-center">
-        <canvas ref="volumeChart" class="w-full h-full"></canvas>
-      </div>
-    </div>
-  </div>
+
 </template>
 <script setup>
 import Chart from 'chart.js/auto';
 import Navbar from '../components/Navbar.vue';
-import Section from '../components/Section.vue';
-import VueTippy from 'vue-tippy'
 import { computed } from 'vue';
 import { calculateChartData } from '../charts/packingChart';
 import { onMounted } from 'vue';
 import { ref } from 'vue';
-import { router } from '@inertiajs/vue3';
-
 
 const props = defineProps({
   trailer: {
     type: Object,
     required: true,
   },
-  tir: {
+  vehicle: {
     type: Object,
     required: true,
   },
+  orderList: {
+    type: Object,
+    required: true,
+  }
 });
 
+const BILION = 1000000000;
+
+const firstRow = computed(() => {
+  if (props.trailer.matrix.length < 10) {
+    return props.trailer.matrix.slice(0, Math.ceil(props.trailer.matrix.length / 2));
+  }
+  // Standardowe dzielenie na trzy części
+  const chunkSize = Math.ceil(props.trailer.matrix.length / 3);
+  return props.trailer.matrix.slice(0, chunkSize);
+});
+
+const secondRow = computed(() => {
+  if (props.trailer.matrix.length < 10) {
+    return [];
+  }
+  const chunkSize = Math.ceil(props.trailer.matrix.length / 3);
+  return props.trailer.matrix.slice(chunkSize, chunkSize + Math.floor(props.trailer.matrix.length / 3));
+});
+
+const thirdRow = computed(() => {
+  if (props.trailer.matrix.length < 10) {
+    return props.trailer.matrix.slice(Math.ceil(props.trailer.matrix.length / 2));
+  }
+  const chunkSize = Math.ceil(props.trailer.matrix.length / 3);
+  return props.trailer.matrix.slice(chunkSize + Math.floor(props.trailer.matrix.length / 3)).reverse();
+});
+
+
 const tooltipContent = (row) => {
-  if (row && row.bin) {
+  if (row) {
     return `
-      <strong>Waga zamówieniat:</strong> ${row.bin.totalFittedWeight + row.bin.weight} kg<br />
-      <strong>Objętość zamówienia:</strong> ${row.bin.totalFittedVolume + row.bin.volume} m³<br />
+      <strong>Waga zamówienia + stojak:</strong> ${row.totalFittedWeight + row.weight} kg<br />
+      <strong>Objętość zamówienia:</strong> ${(row.volume) / BILION} m³<br />
       <h5>Informacja o oknach:</h5>
       <ul>
-       ${row.bin.fittedItems.map(item => `<li>${item.id} (Weight: ${item.weight} kg, Volume: ${item.volume} m³)</li>`).join('')}
+       ${row.fittedItems.map(item => `<li>${item.id} (Waga: ${item.weight} kg, Objętość: ${item.volume / BILION} m³)</li>`).join('')}
       </ul>
     `;
   }
@@ -121,11 +219,10 @@ const tooltipContent = (row) => {
 };
 
 const trailerData = {
-  total_volume: (props.tir.height * props.tir.width * props.tir.length).toFixed(2),
-  total_weight: props.tir.max_weight,
+  total_volume: (props.vehicle.height * props.vehicle.width * props.vehicle.length).toFixed(2),
+  total_weight: props.vehicle.max_weight,
   matrix: props.trailer.matrix,
 };
-console.Console
 
 const chartData = calculateChartData(trailerData);
 
@@ -172,17 +269,5 @@ onMounted(() => {
       },
     });
   }
-});
-
-function chunkArray(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
-}
-
-const groupedMatrix = computed(() => {
-  return chunkArray(props.trailer.matrix, Math.ceil(props.trailer.matrix.length / 3));
 });
 </script>

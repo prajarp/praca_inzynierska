@@ -5,12 +5,20 @@
       <div class="flex flex-col items-center justify-center border rounded-lg">
         <div class="w-full max-w-2xl bg-neutral-50 flex items-center justify-between py-4 px-4 rounded-t-lg mb-2">
           <p class="font-bold text-black text-xl">Wybrane zamówienia</p>
-          <button class="text-white bg-green-600 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2 text-center" @click="sendToAnotherView">
+          <button
+            class="px-5 py-2 text-white font-medium text-sm rounded-md transition 
+                  bg-green-600 hover:bg-green-800 focus:outline-none focus:ring-4 
+                  focus:ring-green-300 disabled:bg-gray-400 disabled:text-gray-300 
+                  disabled:cursor-not-allowed"
+            @click="sendToAnotherView"
+            :disabled="selectedOrders.length < 1"
+          >
             Stwórz trasę
           </button>
-          <button @click="clearList"
-            class="text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-4 focus:ring-yellow-400 font-medium rounded-full text-sm px-5 py-2 text-center">Wyczyść
-            listę</button>
+          <button
+            class="text-white bg-red-500 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-400 font-medium rounded-md text-sm px-5 py-2 text-center disabled:bg-gray-400 disabled:text-gray-300 
+                  disabled:cursor-not-allowed"  @click="clearList" :disabled="selectedOrders.length < 1">
+            Wyczyść listę</button>
         </div>
         <ul v-if="selectedOrders.length" class="w-full max-w-2xl bg-gray-200">
           <li v-for="order in selectedOrders" :key="order.id" class="list-none mb-2">
@@ -25,7 +33,7 @@
               </div>
               <div class="w-1/4 flex items-center justify-center bg-neutral-50">
                 <button @click="removeOrder(order.id)"
-                  class="text-white bg-red-600 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2 text-center">
+                  class="text-white bg-red-600 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-md text-sm px-5 py-2 text-center">
                   Usuń
                 </button>
               </div>
@@ -83,26 +91,28 @@
               <input type="checkbox" :value="order" v-model="selectedOrders" />
             </td>
             <td class="px-6 py-4">{{ order.id }}</td>
-            <div v-tippy="{
-              content: tooltipContent(order),
-              theme: 'light',
-              allowHTML: true,
-              placement: 'top'
-            }">
-              <td class="px-6 py-4">{{ order.client_name }}</td>
-            </div>
+            <td class="px-6 py-4">
+              <div v-tippy="{
+                content: tooltipContent(order),
+                theme: 'light',
+                allowHTML: true,
+                placement: 'top'
+              }">
+                {{ order.client_name }}
+              </div>
+            </td>
             <td class="px-6 py-4">{{ order.delivery_address }}</td>
             <td class="px-6 py-4">{{ order.voivodeship }}</td>
             <td class="px-6 py-4">{{ order.expected_delivery_date }}</td>
             <td class="px-6 py-4">{{ sumWeight(order) }} kg</td>
-            <td class="px-6 py-4">{{ sumVolume(order) }} m²</td>
+            <td class="px-6 py-4">{{ sumVolume(order)}} m²</td>
           </tr>
         </tbody>
       </table>
 
       <div class="mt-4 flex justify-between items-center">
         <button :disabled="pagination.current_page === 1" @click="goToPage(pagination.current_page - 1)"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-400 text-white disabled:opacity-50">
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-400 text-white disabled:opacity-50 rounded-md">
           Poprzednia
         </button>
 
@@ -112,11 +122,11 @@
 
         <button :disabled="pagination.current_page === pagination.last_page"
           @click="goToPage(pagination.current_page + 1)"
-          class="px-4 py-2 bg-blue-600 hover:bg-blue-400 text-white disabled:opacity-50">
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-400 text-white disabled:opacity-50rounded-md">
           Następna
         </button>
       </div>
-      <div class="flex flex-row w-full">
+      <div class="flex flex-row w-full bg-neutral-50 mt-5">
         <div class="w-1/2 p-4">
           <table class="table-fixed border-collapse border border-gray-300 w-full text-sm">
             <thead>
@@ -141,7 +151,7 @@
             <thead>
               <tr>
                 <th class="border border-gray-300 px-2 py-1">Pojemność naczepy</th>
-                <th class="border border-gray-300 px-2 py-1">Pojemność zamówień</th>
+                <th class="border border-gray-300 px-2 py-1">Objętość zamówień</th>
               </tr>
             </thead>
             <tbody>
@@ -178,12 +188,14 @@ const props = defineProps({
   trailer: Object,
 });
 
+const BILION = 1000000000;
 const chartCanvas = ref(null);
 const volumeChart = ref(null);
 let weightChart = null;
 let volumeChartInstance = null;
 let totalOrdersWeight = ref(null);
 let totalOrdersVoume = ref(null);
+
 
 const selectedOrders = ref([]);
 
@@ -249,15 +261,15 @@ const sumVolume = (order) => {
     const height = item.height || 0;
     const width = item.width || 0;
     const length = item.length || 0;
-    return total + height * width * length;
+    const volume =  parseFloat((total + (height * width * length) / BILION ).toFixed(2));
+    return volume;
   }, 0);
 };
 
 const tooltipContent = (order) => {
-  console.log(order.order_items);
-if (order) {
+if (order) {  
   return `
-      <strong>Zawartość zamówień:</strong> ${order.order_items.map(item => `<li>${item.id}, (Item Type: ${item.item_type}), (Weight: ${item.weight} kg,)</li>`).join('')}
+      <strong>Zawartość zamówień:</strong> ${order.order_items.map(item => `<li>${item.id}, (Item Type: ${item.item_type}), (Waga: ${item.weight} kg, Objętość: ${(item.height * item.width* item.length) / BILION} m²)</li>`).join('')}
     `;
 }
 return 'No details available';

@@ -14,12 +14,6 @@ class Order extends Model
         'delivery_address',
         'voivodeship',
         'expected_delivery_date',
-        'window_quantity',
-        'other_elements_quantity',
-        'windows_weight',
-        'total_weight',
-        'window_area',
-        'window_dimensions',
     ];
 
     public function orderItems()
@@ -37,10 +31,4 @@ class Order extends Model
     {
         return $this->hasOne(Coordinates::class);
     }
-
-    public function getWindowsWeightAttribute()
-    {
-        return $this->orderItems->where('item_type', 'window')->sum('weight');
-    }
-
 }

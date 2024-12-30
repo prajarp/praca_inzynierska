@@ -7,17 +7,18 @@
             <button
                 class="text-white bg-green-600 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-xl px-5 py-3 text-center"
                 @click="sentToPacking">
-                Przygotuj zamówienie
+                Przygotuj proces pakowania
             </button>
         </div>
     </div>
 </template>
 <script setup>
 
-import { defineProps, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 const props = defineProps({
     selectedOrders: Object,
+    vehicle: Object,
 });
 
 const TOMTOM_API_KEY = import.meta.env.VITE_API_KEY;

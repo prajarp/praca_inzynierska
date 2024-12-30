@@ -11,22 +11,18 @@ use Illuminate\Http\Request;
 class OrderService
 {
     private string $TOM_TOM_API_KEY;
-    private float $START_LAT = 52.955022599573766;
-    private float $START_LON = 22.294275637435177;
-    private string $START_ADDRESS = 'Stary Laskowiec 4, 18-300 Stary Laskowiec';
+    private float $START_LAT;
+    private float $START_LON;
+    private string $START_ADDRESS;
 
     public function __construct()
     {
         $this->TOM_TOM_API_KEY = env('TOMTOM_API_KEY');
+        $this->START_ADDRESS = env('START_ADDRESS');
+        $this->START_LAT = env('START_LAT');
+        $this->START_LON = env('START_LON');
     }
 
-    public function roundToNearestHalf(float $value): float
-    {
-        $floor = floor($value);
-        $fraction = $value - $floor;
-
-        return $fraction <= 0.5 ? $floor + 0.5 : ceil($value);
-    }
     public function getCoordinatesWithOrders(): array
     {
         $startedLocations = $this->getStartLocation();
@@ -52,12 +48,12 @@ class OrderService
                 ];
                 continue;
             }
-    
+
             $geocodeData = $this->fetchCoordinatesFromApi($address);
-    
+
             if ($geocodeData) {
                 $coordinates[] = [
-                    'order_id'  => $selectedOrder->id,
+                    'order_id'  => $selectedOrder->order->id,
                     'address'   => $address,
                     'latitude'  => $geocodeData['lat'],
                     'longitude' => $geocodeData['lon'],
@@ -76,9 +72,9 @@ class OrderService
                 return $items->filter(fn($item) => $item->item_type === 'window')
                     ->map(fn($item) => [
                         'weight' => $item->weight,
-                        'height' => $this->roundToNearestHalf($item->height),
-                        'width'  => $this->roundToNearestHalf($item->width),
-                        'length' => $this->roundToNearestHalf($item->length),
+                        'height' => $item->height,
+                        'width'  => $item->width,
+                        'length' => $item->length,
                     ]);
             }, fn() => collect([]))
             ->values()
@@ -149,123 +145,6 @@ class OrderService
 
         return 2 * $earthRadius * atan2(sqrt($a), sqrt(1 - $a));
     }
-//     public function calculateRoute()
-// {
-//     $coordinates = $this->getCoordinatesWithOrders();
-//     $apiKey = $this->TOM_TOM_API_KEY;
-
-//     foreach (range(0, count($coordinates) - 2) as $i) {
-//         $origin = $coordinates[$i];
-//         $destination = $coordinates[$i + 1];
-//         $results = [];
-
-//         $url = sprintf(
-//             'https://api.tomtom.com/routing/1/calculateRoute/%s,%s:%s,%s/json',
-//             $origin['latitude'], $origin['longitude'],
-//             $destination['latitude'], $destination['longitude']
-//         );
-
-//         $response = Http::get($url, [
-//             'key'        => $apiKey,
-//             'routeType'  => 'fastest',
-//             'travelMode' => 'truck',
-//             'traffic'    => 'true',
-//         ]);
-
-//         if ($response->failed()) {
-//             $results[] = [
-//                 'from'  => $origin['address'],
-//                 'to'    => $destination['address'],
-//                 'error' => 'Nie udało się obliczyć trasy.',
-//             ];
-//             continue;
-//         }
-
-//         $routeData = $response->json();
-
-//         if (!isset($routeData['routes'][0]['summary'])) {
-//             $results[] = [
-//                 'from'  => $origin['address'],
-//                 'to'    => $destination['address'],
-//                 'error' => 'Brak danych o trasie.',
-//             ];
-//             continue;
-//         }
-
-//         $routeSummary = $routeData['routes'][0]['summary'];
-
-//         $results[] = [
-//             'from'=> $origin['address'],
-//             'to' => $destination['address'],
-//             'distance_in_km' => round($routeSummary['lengthInMeters'] / 1000, 2),
-//             'travel_time_in_minutes' => round($routeSummary['travelTimeInSeconds'] / 60, 2),
-//             'traffic_delay_in_minutes' => round($routeSummary['trafficDelayInSeconds'] / 60, 2),
-//         ];
-//         $coordinates[$i + 1] += [
-//             'travel_info' => $results,
-//         ];
-//     };
-//     return response()->json($coordinates);
-// }
-
-    // public function calculateRoute()
-    // {
-    //     $coordinates = $this->getCoordinatesWithOrders();
-    //     $apiKey = $this->TOM_TOM_API_KEY;
-
-    //     foreach (range(0, count($coordinates) - 2) as $i) {
-    //         $origin = $coordinates[$i];
-    //         $destination = $coordinates[$i + 1];
-    //         $results = [];
-
-    //         $url = sprintf(
-    //             'https://api.tomtom.com/routing/1/calculateRoute/%s,%s:%s,%s/json',
-    //             $origin['latitude'], $origin['longitude'],
-    //             $destination['latitude'], $destination['longitude']
-    //         );
-
-    //         $response = Http::get($url, [
-    //             'key'        => $apiKey,
-    //             'routeType'  => 'fastest',
-    //             'travelMode' => 'truck',
-    //             'traffic'    => 'true',
-    //         ]);
-
-    //         if ($response->failed()) {
-    //             $results[] = [
-    //                 'from'  => $origin['address'],
-    //                 'to'    => $destination['address'],
-    //                 'error' => 'Nie udało się obliczyć trasy.',
-    //             ];
-    //             continue;
-    //         }
-
-    //         $routeData = $response->json();
-
-    //         if (!isset($routeData['routes'][0]['summary'])) {
-    //             $results[] = [
-    //                 'from'  => $origin['address'],
-    //                 'to'    => $destination['address'],
-    //                 'error' => 'Brak danych o trasie.',
-    //             ];
-    //             continue;
-    //         }
-
-    //         $routeSummary = $routeData['routes'][0]['summary'];
-
-    //         $results[] = [
-    //             'from'                   => $origin['address'],
-    //             'to'                     => $destination['address'],
-    //             'distance_in_km'         => round($routeSummary['lengthInMeters'] / 1000, 2),
-    //             'travel_time_in_minutes' => round($routeSummary['travelTimeInSeconds'] / 60, 2),
-    //             'traffic_delay_in_minutes' => round($routeSummary['trafficDelayInSeconds'] / 60, 2),
-    //         ];
-    //         $coordinates[$i + 1] += [
-    //             'travel_info' => $results,
-    //         ];
-    //     };
-    //     return response()->json($coordinates);
-    // }
 
     public function getStartLocation(): array
     {

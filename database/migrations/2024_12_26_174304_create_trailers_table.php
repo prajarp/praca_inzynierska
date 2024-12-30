@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('trailers', function (Blueprint $table) {
             $table->id();
@@ -18,6 +18,9 @@ return new class extends Migration
             $table->float('width');
             $table->float('length');
             $table->float('max_weight');
+            $table->float('total_height');
+            $table->float('total_length');
+            $table->float('axle_weight');
             $table->timestamps();
         });
     }

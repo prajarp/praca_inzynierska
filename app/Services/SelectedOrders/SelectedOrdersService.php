@@ -42,16 +42,15 @@ class SelectedOrdersService
             'order.coordinates'
         ])->get();
 
-        foreach ($selectedOrders as $order) {
-            $address = $order->order->delivery_address;
-
-            if (!is_null($order->order->coordinates?->latitude) && !is_null($order->order->coordinates?->longitude)) {
+        foreach ($selectedOrders as $selectedOrder) {
+            $address = $selectedOrder->order->delivery_address;
+            if (!is_null($selectedOrder->order->coordinates?->latitude) && !is_null($selectedOrder->order->coordinates?->longitude)) {
                 $coordinates[] = [
-                    'order_id'  => $order->id,
+                    'order_id'  => $selectedOrder->order->id,
                     'address'   => $address,
-                    'latitude'  => $order->order->coordinates->latitude,
-                    'longitude' => $order->order->coordinates->longitude,
-                    'windows'   => $this->getOrderWindows($order),
+                    'latitude'  => $selectedOrder->order->coordinates->latitude,
+                    'longitude' => $selectedOrder->order->coordinates->longitude,
+                    'windows'   => $this->getOrderWindows($selectedOrder->order),
                 ];
                 continue;
             }
@@ -60,11 +59,11 @@ class SelectedOrdersService
 
             if ($geocodeData) {
                 $coordinates[] = [
-                    'order_id'  => $order->id,
+                    'order_id'  => $selectedOrder->order->id,
                     'address'   => $address,
                     'latitude'  => $geocodeData['lat'],
                     'longitude' => $geocodeData['lon'],
-                    'windows'   => $this->getOrderWindows($order),
+                    'windows'   => $this->getOrderWindows($selectedOrder->order),
                 ];
             }
         }
@@ -74,18 +73,18 @@ class SelectedOrdersService
 
     private function getOrderWindows($order): array
     {
-        return $order->order->orderItems
-            ->whenNotEmpty(function ($items) {
-                return $items->filter(fn($item) => $item->item_type === 'window')
-                    ->map(fn($item) => [
-                        'weight' => $item->weight,
-                        'height' => $this->roundToNearestHalf($item->height),
-                        'width'  => $this->roundToNearestHalf($item->width),
-                        'length' => $this->roundToNearestHalf($item->length),
-                    ]);
-            }, fn() => collect([]))
-            ->values()
-            ->toArray();
+        return $order->orderItems
+        ->whenNotEmpty(function ($items) {
+            return $items->filter(fn($item) => $item->item_type === 'window')
+                ->map(fn($item) => [
+                    'weight' => $item->weight,
+                    'height' => $item->height,
+                    'width'  => $item->width,
+                    'length' => $item->length,
+                ]);
+        }, fn() => collect([]))
+        ->values()
+        ->toArray();
     }
 
     private function getOptimizedRoute(array $coordinates): array

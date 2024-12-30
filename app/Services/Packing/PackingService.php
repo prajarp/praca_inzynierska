@@ -5,6 +5,7 @@ namespace App\Services\Packing;
 use App\Models\Order;
 use App\Models\Rack;
 use App\Services\Order\OrderService;
+use Illuminate\Support\Collection;
 use Latuconsinafr\BinPackager\BinPackager3D\Bin;
 use Latuconsinafr\BinPackager\BinPackager3D\Item;
 use Latuconsinafr\BinPackager\BinPackager3D\Packager;
@@ -19,7 +20,6 @@ class PackingService
     public function getSortedItemsForEachOrder(): array
     {
         $coordinatesWithOrders = $this->orderService->getCoordinatesWithOrders();
-
         $sortedOrders = [];
 
         foreach ($coordinatesWithOrders as $orderData) {
@@ -148,26 +148,11 @@ class PackingService
 
         $trailer['matrix'] = $results->all();
 
-        $this->moveLastThreeToIndexes($trailer['matrix']);
-
         $trailer['total_weight'] = $results->sum(fn($result) => $result['bin']->getWeight()) + $results->sum(fn($result) => $result['bin']->getTotalFittedWeight());
-        $trailer['total_volume'] = $results->sum(fn($result) => $result['bin']->getVolume());
+        $trailer['total_volume'] = ($results->sum(fn($result) => $result['bin']->getVolume()));
 
         return [
             'trailer' => $trailer,
         ];
-    }
-
-    function moveLastThreeToIndexes(array &$matrix)
-    {
-        $resultsCount = count($matrix);
-
-        if ($resultsCount < 7) {
-            return;
-        }
-
-        $elementsToMove = array_splice($matrix, -3);
-
-        array_splice($matrix, 3, 0, $elementsToMove);
     }
 }

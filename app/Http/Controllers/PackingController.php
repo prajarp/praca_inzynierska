@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SelectedOrder;
 use App\Models\Trailer;
 use App\Services\Packing\PackingService;
 use Inertia\Inertia;
@@ -12,13 +13,12 @@ class PackingController extends Controller
 
     public function index(): \Inertia\Response
     {
-        $tir = Trailer::first();
-
         $trailerData = $this->packingService->packOrdersIntoTrailer();
 
         return Inertia::render('Packing', [
             'trailer' => $trailerData['trailer'],
-            'tir' => $tir,
+            'vehicle' => Trailer::first(),
+            'orderList' => $this->packingService->getSortedItemsForEachOrder(),
         ]);
     }
 }

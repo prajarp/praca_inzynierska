@@ -1,7 +1,8 @@
+const BILION = 1000000000;
+
 export function calculateChartData(trailer) {
     const maxWeight = trailer.total_weight;
     const maxVolume = trailer.total_volume;
-    console.log(trailer);
 
     const totalWeight = trailer.matrix.flat().reduce((sum, trailerItem) => {
       if (trailerItem?.bin) {
@@ -14,8 +15,10 @@ export function calculateChartData(trailer) {
   }, 0);
 
     const totalVolume = trailer.matrix.flat().reduce((sum, trailerItem) => {
+      
       if(trailerItem?.bin) {
-        return sum + trailerItem.bin.volume;
+        const binVolume = (trailerItem.bin.length * trailerItem.bin.height * trailerItem.bin.breadth) / BILION;
+        return sum + binVolume;
       }
       return sum;
     }, 0);
