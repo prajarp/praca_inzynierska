@@ -81,7 +81,7 @@ class OrderService
             ->toArray();
     }
 
-    private function fetchCoordinatesFromApi(string $address): ?array
+    public function fetchCoordinatesFromApi(string $address): ?array
     {
         $response = Http::get(
             'https://api.tomtom.com/search/2/geocode/'.urlencode($address).'.json',
